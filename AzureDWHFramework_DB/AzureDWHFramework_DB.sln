@@ -5,6 +5,8 @@ VisualStudioVersion = 16.0.32929.386
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "AzureDWHFramework_DB", "AzureDWHFramework_DB\AzureDWHFramework_DB.sqlproj", "{279F8ECE-8E33-4FEF-981B-44BEC5737A03}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AzureDWHFramework_TabularModelGenerator", "AzureDWHFramework_TabularModelGenerator\AzureDWHFramework_TabularModelGenerator.csproj", "{A2FB7B45-3098-4050-9532-4836C593A58A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -17,6 +19,10 @@ Global
 		{279F8ECE-8E33-4FEF-981B-44BEC5737A03}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{279F8ECE-8E33-4FEF-981B-44BEC5737A03}.Release|Any CPU.Build.0 = Release|Any CPU
 		{279F8ECE-8E33-4FEF-981B-44BEC5737A03}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{A2FB7B45-3098-4050-9532-4836C593A58A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A2FB7B45-3098-4050-9532-4836C593A58A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A2FB7B45-3098-4050-9532-4836C593A58A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A2FB7B45-3098-4050-9532-4836C593A58A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
