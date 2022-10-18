@@ -16,7 +16,7 @@ namespace AzureDWHFramework_TabularModelGenerator
             log.Info("C# HTTP trigger function processed a request.");
 
             // parse query parameter
-            string name = req.GetQueryNameValuePairs()
+            string name = req.GetQueryNameValuePairs() 
                 .FirstOrDefault(q => string.Compare(q.Key, "name", true) == 0)
                 .Value;
 
