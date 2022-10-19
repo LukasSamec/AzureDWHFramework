@@ -60,6 +60,9 @@
     <Folder Include="conf\Tables\" />
     <Folder Include="conf\Stored Procedures\" />
     <Folder Include="Security\" />
+    <Folder Include="log\" />
+    <Folder Include="log\Tables\" />
+    <Folder Include="log\Stored Procedures\" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="conf\Tables\StageTableMetadata.sql" />
@@ -67,6 +70,8 @@
     <Build Include="Security\log.sql" />
     <Build Include="Security\conf.sql" />
     <Build Include="conf\Stored Procedures\p_RebuildAllStageTables.sql" />
+    <Build Include="log\Tables\FrameworkLog.sql" />
+    <Build Include="log\Stored Procedures\InsertFrameworkLog.sql" />
   </ItemGroup>
   <ItemGroup>
     <ArtifactReference Include="C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\IDE\Extensions\Microsoft\SQLDB\Extensions\SqlServer\130\SqlSchemas\master.dacpac">

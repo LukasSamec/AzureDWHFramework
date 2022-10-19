@@ -3,6 +3,14 @@
 @TableName NVARCHAR(255)
 AS
 DECLARE @sql AS NVARCHAR(MAX)
+DECLARE @ProcedureName AS NVARCHAR(100) = OBJECT_NAME(@@PROCID)
+DECLARE @LogMessage AS NVARCHAR(MAX)
+
+BEGIN TRY
+
+SET @LogMessage = 'Rebuilding stage table ' + @TableSchema + '.' + @TableName + ' has started'
+
+EXEC log.InsertFrameworkLog @ProcedureName, 'Info', @LogMessage
 
 SET @sql = 'IF OBJECT_ID(''' + @TableSchema + '.' + @TableName + ''', N''U'') IS NOT NULL ' + 'DROP TABLE ' + @TableSchema + '.' + @TableName
 
@@ -28,3 +36,14 @@ SET @sql =
 
 --print (@sql)
 execute sp_executesql @sql
+
+SET @LogMessage = 'Rebuilding stage table ' + @TableSchema + '.' + @TableName + ' has finished'
+
+EXEC log.InsertFrameworkLog @ProcedureName, 'Info', @LogMessage
+
+END TRY
+BEGIN CATCH
+	DECLARE @ErrorMessage NVARCHAR(4000) = ERROR_MESSAGE()
+	EXEC log.InsertFrameworkLog @ProcedureName ,'Error', @ErrorMessage;
+	THROW
+END CATCH
