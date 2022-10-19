@@ -66,6 +66,7 @@
     <Build Include="conf\Stored Procedures\p_RebuildStageTable.sql" />
     <Build Include="Security\log.sql" />
     <Build Include="Security\conf.sql" />
+    <Build Include="conf\Stored Procedures\p_RebuildAllStageTables.sql" />
   </ItemGroup>
   <ItemGroup>
     <ArtifactReference Include="$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\130\SqlSchemas\master.dacpac">
