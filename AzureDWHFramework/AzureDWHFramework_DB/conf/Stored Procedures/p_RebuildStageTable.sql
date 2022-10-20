@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [conf].[p_RebuildStageTable] 
-@TableSchema NVARCHAR(255),
-@TableName NVARCHAR(255)
+@StageTableID INT,
+@SchemaName NVARCHAR(100),
+@TableName  NVARCHAR(100) 
 AS
 DECLARE @sql AS NVARCHAR(MAX)
 DECLARE @ProcedureName AS NVARCHAR(100) = OBJECT_NAME(@@PROCID)
@@ -8,17 +9,17 @@ DECLARE @LogMessage AS NVARCHAR(MAX)
 
 BEGIN TRY
 
-SET @LogMessage = 'Rebuilding stage table ' + @TableSchema + '.' + @TableName + ' has started'
+SET @LogMessage = 'Rebuilding stage table ' + @SchemaName + '.' + @TableName + ' has started'
 
 EXEC log.InsertFrameworkLog @ProcedureName, 'Info', @LogMessage
 
-SET @sql = 'IF OBJECT_ID(''' + @TableSchema + '.' + @TableName + ''', N''U'') IS NOT NULL ' + 'DROP TABLE ' + @TableSchema + '.' + @TableName
+SET @sql = 'IF OBJECT_ID(''' + @SchemaName + '.' + @TableName + ''', N''U'') IS NOT NULL ' + 'DROP TABLE ' + @SchemaName + '.' + @TableName
 
 --print (@sql)
 execute sp_executesql @sql
 
 SET @sql = 
-'CREATE TABLE ' + @TableSchema + '.' + @TableName + ' (' +
+'CREATE TABLE ' + @SchemaName + '.' + @TableName + ' (' +
  (
    SELECT STRING_AGG
    (
@@ -27,7 +28,7 @@ SET @sql =
 			'[', ColumnName, '] ', DataType, ' ', CASE WHEN Nullable = 1 THEN 'NULL' ELSE 'NOT NULL' END
 		) , ', '
    ) 
-	FROM conf.StageTableColumn col INNER JOIN conf.StageTable tab ON tab.StageTableID = col.StageTableID WHERE TableName = @TableName AND SchemaName = @TableSchema
+	FROM conf.StageTableColumn WHERE StageTableID = @StageTableID
  ) +
 ',[InsertedID] BIGINT NOT NULL FOREIGN KEY REFERENCES log.ETLLog(ETLLogID)' +
 ',[UpdatedID] BIGINT NOT NULL FOREIGN KEY REFERENCES log.ETLLog(ETLLogID)' +
@@ -37,7 +38,7 @@ SET @sql =
 --print (@sql)
 execute sp_executesql @sql
 
-SET @LogMessage = 'Rebuilding stage table ' + @TableSchema + '.' + @TableName + ' has finished'
+SET @LogMessage = 'Rebuilding stage table ' + @SchemaName + '.' + @TableName + ' has finished'
 
 EXEC log.InsertFrameworkLog @ProcedureName, 'Info', @LogMessage
 
