@@ -5,8 +5,10 @@
     [Type]           NVARCHAR (10)  NOT NULL,
     [Message]        NVARCHAR (MAX) NOT NULL,
     PRIMARY KEY CLUSTERED ([FrameworkLogID] ASC),
-    CONSTRAINT [Check_FrameworkLog_Message] CHECK ([Type]='Error' OR [Type]='Info')
+    CHECK ([Type]='Error' OR [Type]='Info')
 );
+
+
 
 
 
