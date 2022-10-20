@@ -4,4 +4,4 @@
 @Message NVARCHAR(MAX)
 AS
 INSERT INTO log.FrameworkLog(CreatedDate, Type, Message, ProcedureName) 
-VALUES(GETDATE(), @Type, @Message, @ProcedureName)
+VALUES(GETUTCDATE(), @Type, @Message, @ProcedureName)

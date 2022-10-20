@@ -65,7 +65,6 @@
     <Folder Include="log\Stored Procedures\" />
   </ItemGroup>
   <ItemGroup>
-    <Build Include="conf\Tables\StageTableMetadata.sql" />
     <Build Include="conf\Stored Procedures\p_RebuildStageTable.sql" />
     <Build Include="Security\log.sql" />
     <Build Include="Security\conf.sql" />
@@ -74,10 +73,18 @@
     <Build Include="log\Stored Procedures\InsertFrameworkLog.sql" />
     <Build Include="log\Tables\ETLTableLoadLog.sql" />
     <Build Include="log\Tables\ETLLog.sql" />
+    <Build Include="conf\Tables\StageTableColumn.sql" />
+    <Build Include="conf\Tables\StageTable.sql" />
+    <Build Include="conf\Tables\DimensionTableColumn.sql" />
+    <Build Include="conf\Tables\DimensionTable.sql" />
+    <Build Include="log\Stored Procedures\p_WriteETLTableLoadLog.sql" />
+    <Build Include="log\Stored Procedures\p_WriteETLLog.sql" />
+    <Build Include="log\Stored Procedures\p_UpdateETLTableLoadLog.sql" />
+    <Build Include="log\Stored Procedures\p_UpdateETLLog.sql" />
   </ItemGroup>
   <ItemGroup>
-    <ArtifactReference Include="C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\IDE\Extensions\Microsoft\SQLDB\Extensions\SqlServer\130\SqlSchemas\master.dacpac">
-      <HintPath>C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\IDE\Extensions\Microsoft\SQLDB\Extensions\SqlServer\130\SqlSchemas\master.dacpac</HintPath>
+    <ArtifactReference Include="C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\IDE\Extensions\Microsoft\SQLDB\Extensions\SqlServer\AzureV12\SqlSchemas\master.dacpac">
+      <HintPath>C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\IDE\Extensions\Microsoft\SQLDB\Extensions\SqlServer\AzureV12\SqlSchemas\master.dacpac</HintPath>
       <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
       <DatabaseVariableLiteralValue>master</DatabaseVariableLiteralValue>
     </ArtifactReference>

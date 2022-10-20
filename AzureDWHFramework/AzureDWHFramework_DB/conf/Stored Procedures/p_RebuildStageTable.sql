@@ -27,10 +27,10 @@ SET @sql =
 			'[', ColumnName, '] ', DataType, ' ', CASE WHEN Nullable = 1 THEN 'NULL' ELSE 'NOT NULL' END
 		) , ', '
    ) 
-	FROM conf.StageTableMetadata WHERE TableName = @TableName AND SchemaName = @TableSchema
+	FROM conf.StageTableColumn col INNER JOIN conf.StageTable tab ON tab.StageTableID = col.StageTableID WHERE TableName = @TableName AND SchemaName = @TableSchema
  ) +
-',[InsertedID] BIGINT NOT NULL' +
-',[UpdatedID] BIGINT NOT NULL' +
+',[InsertedID] BIGINT NOT NULL FOREIGN KEY REFERENCES log.ETLLog(ETLLogID)' +
+',[UpdatedID] BIGINT NOT NULL FOREIGN KEY REFERENCES log.ETLLog(ETLLogID)' +
 ')'
 
 

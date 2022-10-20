@@ -10,7 +10,7 @@ BEGIN TRY
 EXEC log.InsertFrameworkLog @ProcedureName, 'Info',  'Rebuilding all stage tables has started';
 
 DECLARE stageTable CURSOR FOR
-SELECT DISTINCT SchemaName, TableName from conf.StageTableMetadata
+SELECT DISTINCT SchemaName, TableName from conf.StageTable
 
 OPEN stageTable
 FETCH NEXT FROM stageTable INTO @SchemaName, @TableName

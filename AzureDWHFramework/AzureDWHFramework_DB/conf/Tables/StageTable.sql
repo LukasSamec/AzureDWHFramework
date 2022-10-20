@@ -1,0 +1,7 @@
+﻿CREATE TABLE [conf].[StageTable] (
+    [StageTableID] INT            IDENTITY (1, 1) NOT NULL,
+    [SchemaName]   NVARCHAR (255) NOT NULL,
+    [TableName]    NVARCHAR (255) NOT NULL,
+    PRIMARY KEY CLUSTERED ([StageTableID] ASC)
+);
+
