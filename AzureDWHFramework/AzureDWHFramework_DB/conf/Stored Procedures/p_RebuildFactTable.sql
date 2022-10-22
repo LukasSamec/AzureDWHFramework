@@ -28,11 +28,11 @@ SET @sql =
    (
 		CONCAT
 		(
-			'[', factTableColumn.ColumnName, '] ', factTableColumn.DataType, ' ', CASE WHEN factTableColumn.Nullable = 1 THEN 'NULL' ELSE 'NOT NULL' END, CASE WHEN factTableColumn.ReferenceDimensionTable IS NOT NULL THEN ' FOREIGN KEY REFERENCES ' + dimTable.SchemaName + '.D_' + dimTable.TableName + '('+ dimTable.TableName + 'ID)' END
+			'[', factTableColumn.ColumnName, '] ', factTableColumn.DataType, ' ', CASE WHEN factTableColumn.Nullable = 1 THEN 'NULL' ELSE 'NOT NULL' END, CASE WHEN factTableColumn.DimensionTableID IS NOT NULL THEN ' FOREIGN KEY REFERENCES ' + dimTable.SchemaName + '.D_' + dimTable.TableName + '('+ dimTable.TableName + 'ID)' END
 		) , ', '
    ) 
 	FROM conf.FactTableColumn factTableColumn 
-	LEFT JOIN conf.DimensionTable dimTable ON dimTable.DimensionTableID = factTableColumn.ReferenceDimensionTable 
+	LEFT JOIN conf.DimensionTable dimTable ON dimTable.DimensionTableID = factTableColumn.DimensionTableID
 	WHERE FactTableID = @FactTableID
  ) +
 ',[InsertedID] BIGINT NOT NULL FOREIGN KEY REFERENCES log.ETLLog(ETLLogID)' +

@@ -5,11 +5,13 @@
     [DataType]               NVARCHAR (255) NOT NULL,
     [Nullable]               BIT            NOT NULL,
     [BusinessKey]            BIT            NOT NULL,
-    [StageTableColumn]       INT            NOT NULL,
+    [StageTableColumnID]     INT            NOT NULL,
     PRIMARY KEY CLUSTERED ([DimensionTableColumnID] ASC),
     FOREIGN KEY ([DimensionTableID]) REFERENCES [conf].[DimensionTable] ([DimensionTableID]),
-    FOREIGN KEY ([StageTableColumn]) REFERENCES [conf].[StageTableColumn] ([StageTableColumnID])
+    FOREIGN KEY ([StageTableColumnID]) REFERENCES [conf].[StageTableColumn] ([StageTableColumnID])
 );
+
+
 
 
 
