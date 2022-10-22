@@ -18,7 +18,6 @@ namespace AzureDWHFramework_TabularModelGenerator
         [FunctionName("RebuildAllTabularModels")]
         public static async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)] HttpRequest req,ILogger log)
         {
-            log.LogInformation("C# HTTP trigger function processed a request.");
 
             string keyVault = req.Query["keyVault"];
 
@@ -31,13 +30,16 @@ namespace AzureDWHFramework_TabularModelGenerator
             string sqlConnString = kv.GetSecretAsync(keyVault, "DatabaseConnectionString").Result.Value;
             string ssasConnString = kv.GetSecretAsync(keyVault, "SSASConnectionString").Result.Value;
 
+            string tenantId = kv.GetSecretAsync(keyVault, "TenantID").Result.Value;
+            string appId = kv.GetSecretAsync(keyVault, "TabularModelGeneratorAppID").Result.Value;
+            string appSecret = kv.GetSecretAsync(keyVault, "TabularModelGeneratorAppSecret").Result.Value;
+            string appUrl = kv.GetSecretAsync(keyVault, "TabularModelGeneratorURL").Result.Value;
+
             MSSQLDatabaseConnector databaseConnector = new MSSQLDatabaseConnector(sqlConnString);
             SSASDatabaseConnector ssasConnector = new SSASDatabaseConnector(ssasConnString);
 
             databaseConnector.InitConnection();
-            ssasConnector.InitConnection();
-
-
+            ssasConnector.InitConnection(appUrl,tenantId,appId,appSecret);
             databaseConnector.CloseConnection();
 
 
