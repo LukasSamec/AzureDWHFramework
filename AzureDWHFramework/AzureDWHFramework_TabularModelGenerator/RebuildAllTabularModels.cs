@@ -11,6 +11,7 @@ using Microsoft.Azure.KeyVault;
 using Microsoft.Azure.Services.AppAuthentication;
 using System.Net.Http;
 using System.Data;
+using Microsoft.AnalysisServices;
 
 namespace AzureDWHFramework_TabularModelGenerator
 {
@@ -31,21 +32,38 @@ namespace AzureDWHFramework_TabularModelGenerator
             string sqlConnString = kv.GetSecretAsync(keyVault, "DatabaseConnectionString").Result.Value;
             string ssasConnString = kv.GetSecretAsync(keyVault, "SSASConnectionString").Result.Value;
 
+            string ssasDataSourceConnString = kv.GetSecretAsync(keyVault, "SSASDataSourceConnectionString").Result.Value;
+
             string tenantId = kv.GetSecretAsync(keyVault, "TenantID").Result.Value;
             string appId = kv.GetSecretAsync(keyVault, "TabularModelGeneratorAppID").Result.Value;
             string appSecret = kv.GetSecretAsync(keyVault, "TabularModelGeneratorAppSecret").Result.Value;
             string appUrl = kv.GetSecretAsync(keyVault, "TabularModelGeneratorURL").Result.Value;
 
+
             MSSQLDatabaseConnector databaseConnector = new MSSQLDatabaseConnector(sqlConnString);
             SSASDatabaseConnector ssasConnector = new SSASDatabaseConnector(ssasConnString);
 
             databaseConnector.InitConnection();
-            await ssasConnector.InitConnection(appUrl,tenantId,appId,appSecret);
+            Server server = await ssasConnector.InitConnection(appUrl,tenantId,appId,appSecret);
 
 
             DataTable tabularModels = databaseConnector.GetTabularModels();
+            foreach (DataRow tabularModel in tabularModels.Rows)
+            {
+                string name = tabularModel["TabularModelName"].ToString();
+                ssasConnector.RebuildTabularModel(name, ssasDataSourceConnString);
+                Database database = server.Databases.FindByName(name);
+                DataTable tables = databaseConnector.GetTablesForTabularModel(name);
+                ssasConnector.RebuildTabularModelTables(database, tables);
 
-            ssasConnector.CreateTabularModels(tabularModels);
+                foreach(DataRow table in tables.Rows)
+                {
+                    string tableName = table["TableName"].ToString();
+                    DataTable columns = databaseConnector.GetColumnsForTableInTabularModel(name, tableName);
+                    ssasConnector.RebuildTableColumns(database, columns, tableName);
+                }
+            }
+
 
             databaseConnector.CloseConnection();
 

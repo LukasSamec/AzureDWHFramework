@@ -1,10 +1,16 @@
 ﻿using Microsoft.AnalysisServices;
+using Microsoft.AnalysisServices.Tabular;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Text;
 using System.Threading.Tasks;
+using Database = Microsoft.AnalysisServices.Database;
+using DataColumn = Microsoft.AnalysisServices.Tabular.DataColumn;
+using DataType = Microsoft.AnalysisServices.DataType;
+using Partition = Microsoft.AnalysisServices.Tabular.Partition;
+using Server = Microsoft.AnalysisServices.Server;
 
 namespace AzureDWHFramework_TabularModelGenerator
 {
@@ -17,12 +23,13 @@ namespace AzureDWHFramework_TabularModelGenerator
             this.connectionString = connectionString;
         }
 
-        public async Task InitConnection(string url, string tenantId, string appId, string appSecret)
+        public async Task<Server> InitConnection(string url, string tenantId, string appId, string appSecret)
         {
             server = new Server();
             string token = await GetAccessToken(url, tenantId, appId, appSecret);
             string connectionStringFinal = connectionString.Replace("<accesstoken>", token);
             server.Connect(connectionStringFinal);
+            return server;
         }
 
         private async Task<string> GetAccessToken(string url, string tenantId, string appId, string appSecret)
@@ -36,24 +43,83 @@ namespace AzureDWHFramework_TabularModelGenerator
             return authenticationResult.AccessToken;
         }
 
-        public void CreateTabularModels(DataTable models)
+        public void RebuildTabularModel(string name, string databaseConnectionString)
         {
-            foreach(DataRow row in models.Rows)
+            if (server.Databases.FindByName(name) == null)
             {
-                string name = row["TabularModelName"].ToString();
-                if(server.Databases.FindByName(name) == null)
+                Database newDatabase = new Database()
                 {
-                    Database newDatabase = new Database()
-                    {
-                        Name = name,
-                        ID = name,
-                        CompatibilityLevel = 1500,
-                        StorageEngineUsed = StorageEngineUsed.TabularMetadata,
-                    };
-                    server.Databases.Add(newDatabase);
-                    newDatabase.Update(UpdateOptions.ExpandFull);
-                }
+                    Name = name,
+                    ID = name,
+                    CompatibilityLevel = 1500,
+                    StorageEngineUsed = StorageEngineUsed.TabularMetadata,
+                };
+                newDatabase.Model = new Model()
+                {
+                    Name = "Model",
+                };
+                newDatabase.Model.DataSources.Add(new ProviderDataSource()
+                {
+                    Name = "DWH",
+                    ConnectionString = databaseConnectionString,
+                    ImpersonationMode = Microsoft.AnalysisServices.Tabular.ImpersonationMode.ImpersonateServiceAccount,
+                    //Account = @".\Administrator",
+                    //Password = "P@ssw0rd",
+                });
+                server.Databases.Add(newDatabase);
+                newDatabase.Update(UpdateOptions.ExpandFull);
             }
+        }
+
+        public void RebuildTabularModelTables(Database database, DataTable tables)
+        {
+            foreach (DataRow table in tables.Rows)
+            {
+                string name = table["TableName"].ToString();
+                string sourceQuery = table["SourceQuery"].ToString();
+
+                Table newTable = new Table
+                {
+                    Name = database.Model.Tables.GetNewName(name),
+                    Partitions =
+                    {
+                        new Partition()
+                        {
+                            Name = name,
+                            Source = new QueryPartitionSource()
+                            {
+                                DataSource = database.Model.DataSources["DWH"],
+                                Query = sourceQuery,
+                            }
+                        }
+                    }
+                };
+
+                database.Model.Tables.Add(newTable);
+            }
+
+            database.Update(UpdateOptions.ExpandFull);
+        }
+
+        public void RebuildTableColumns(Database database, DataTable columns, string tableName)
+        {
+            Table table = database.Model.Tables.Find(tableName);
+
+            foreach(DataRow column in columns.Rows)
+            {
+                string columnName = column["ColumnName"].ToString();
+                string dataType = column["DataType"].ToString();
+                DataColumn newColumn = new DataColumn()
+                {
+                    Name = columnName,
+                    DataType = (Microsoft.AnalysisServices.Tabular.DataType)DataType.String,
+                    SourceColumn = columnName,
+                };
+
+                table.Columns.Add(newColumn);
+            }
+
+            database.Update(UpdateOptions.ExpandFull);
         }
 
     }

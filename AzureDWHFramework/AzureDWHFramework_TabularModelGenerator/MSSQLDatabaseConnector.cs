@@ -43,17 +43,41 @@ namespace AzureDWHFramework_TabularModelGenerator
             }
         }
 
-        public DataTable GetDwhTablesMetadataForTabularModel(string tabularModel)
+        public DataTable GetTablesForTabularModel(string tabularModel)
         {
             DataTable result = new DataTable();
             using (SqlCommand thisCommand = new SqlCommand())
             {
                 thisCommand.CommandType = System.Data.CommandType.StoredProcedure;
-                thisCommand.CommandText = "conf.p_GetDwhTablesMetadataForTabularModel";
+                thisCommand.CommandText = "conf.p_GetTablesForTabularModel";
                 thisCommand.Connection = connection;
 
-                SqlParameter pCustomerId = thisCommand.Parameters.Add("@TabularModel", System.Data.SqlDbType.NVarChar);
-                pCustomerId.Value = tabularModel;
+                SqlParameter tabularModelParam = thisCommand.Parameters.Add("@TabularModel", System.Data.SqlDbType.NVarChar);
+                tabularModelParam.Value = tabularModel;
+
+
+                SqlDataReader dr = thisCommand.ExecuteReader();
+                result.Load(dr);
+                dr.Close();
+
+                return result;
+            }
+        }
+
+        public DataTable GetColumnsForTableInTabularModel(string tabularModel, string tableName)
+        {
+            DataTable result = new DataTable();
+            using (SqlCommand thisCommand = new SqlCommand())
+            {
+                thisCommand.CommandType = System.Data.CommandType.StoredProcedure;
+                thisCommand.CommandText = "conf.p_GetColumnsForTablesInTabularModel";
+                thisCommand.Connection = connection;
+
+                SqlParameter tabularModelParam = thisCommand.Parameters.Add("@TabularModel", System.Data.SqlDbType.NVarChar);
+                tabularModelParam.Value = tabularModel;
+
+                SqlParameter tableNameParam = thisCommand.Parameters.Add("@TableName", System.Data.SqlDbType.NVarChar);
+                tableNameParam.Value = tableName;
 
 
                 SqlDataReader dr = thisCommand.ExecuteReader();
