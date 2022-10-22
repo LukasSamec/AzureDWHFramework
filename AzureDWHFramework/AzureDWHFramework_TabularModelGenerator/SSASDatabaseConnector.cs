@@ -16,11 +16,12 @@ namespace AzureDWHFramework_TabularModelGenerator
             this.connectionString = connectionString;
         }
 
-        public async void InitConnection(string url, string tenantId, string appId, string appSecret)
+        public async Task InitConnection(string url, string tenantId, string appId, string appSecret)
         {
             server = new Server();
             string token = await GetAccessToken(url, tenantId, appId, appSecret);
-            server.Connect(connectionString.Replace("<accesstoken>",token));
+            string connectionStringFinal = connectionString.Replace("<accesstoken>", token);
+            server.Connect(connectionStringFinal);
         }
 
         public static async Task<string> GetAccessToken(string url, string tenantId, string appId, string appSecret)

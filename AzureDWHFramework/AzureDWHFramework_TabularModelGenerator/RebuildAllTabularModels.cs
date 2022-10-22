@@ -39,7 +39,7 @@ namespace AzureDWHFramework_TabularModelGenerator
             SSASDatabaseConnector ssasConnector = new SSASDatabaseConnector(ssasConnString);
 
             databaseConnector.InitConnection();
-            ssasConnector.InitConnection(appUrl,tenantId,appId,appSecret);
+            await ssasConnector.InitConnection(appUrl,tenantId,appId,appSecret);
             databaseConnector.CloseConnection();
 
 
