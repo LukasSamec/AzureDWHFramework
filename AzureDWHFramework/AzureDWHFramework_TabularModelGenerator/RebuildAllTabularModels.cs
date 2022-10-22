@@ -10,6 +10,7 @@ using Newtonsoft.Json;
 using Microsoft.Azure.KeyVault;
 using Microsoft.Azure.Services.AppAuthentication;
 using System.Net.Http;
+using System.Data;
 
 namespace AzureDWHFramework_TabularModelGenerator
 {
@@ -40,6 +41,12 @@ namespace AzureDWHFramework_TabularModelGenerator
 
             databaseConnector.InitConnection();
             await ssasConnector.InitConnection(appUrl,tenantId,appId,appSecret);
+
+
+            DataTable tabularModels = databaseConnector.GetTabularModels();
+
+            ssasConnector.CreateTabularModels(tabularModels);
+
             databaseConnector.CloseConnection();
 
 

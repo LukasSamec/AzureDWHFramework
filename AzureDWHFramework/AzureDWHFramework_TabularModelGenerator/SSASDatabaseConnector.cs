@@ -2,6 +2,7 @@
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -24,7 +25,7 @@ namespace AzureDWHFramework_TabularModelGenerator
             server.Connect(connectionStringFinal);
         }
 
-        public static async Task<string> GetAccessToken(string url, string tenantId, string appId, string appSecret)
+        private async Task<string> GetAccessToken(string url, string tenantId, string appId, string appSecret)
         {
             string authorityUrl = $"https://login.microsoftonline.com/{tenantId}";
             var authContext = new AuthenticationContext(authorityUrl);
@@ -34,6 +35,27 @@ namespace AzureDWHFramework_TabularModelGenerator
 
             return authenticationResult.AccessToken;
         }
+
+        public void CreateTabularModels(DataTable models)
+        {
+            foreach(DataRow row in models.Rows)
+            {
+                string name = row["TabularModelName"].ToString();
+                if(server.Databases.FindByName(name) == null)
+                {
+                    Database newDatabase = new Database()
+                    {
+                        Name = name,
+                        ID = name,
+                        CompatibilityLevel = 1500,
+                        StorageEngineUsed = StorageEngineUsed.TabularMetadata,
+                    };
+                    server.Databases.Add(newDatabase);
+                    newDatabase.Update(UpdateOptions.ExpandFull);
+                }
+            }
+        }
+
     }
 
 }
