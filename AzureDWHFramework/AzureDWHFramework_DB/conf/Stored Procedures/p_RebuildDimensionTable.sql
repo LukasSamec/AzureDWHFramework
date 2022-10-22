@@ -10,7 +10,7 @@ DECLARE @LogMessage AS NVARCHAR(MAX)
 
 BEGIN TRY
 
-SET @LogMessage = 'Rebuilding dimension table ' + @SchemaName + '.' + @TableName + ' has started'
+SET @LogMessage = 'Rebuilding dimension table ' + @SchemaName + '.D_' + @TableName + ' has started'
 
 EXEC log.InsertFrameworkLog @ProcedureName, 'Info', @LogMessage
 
@@ -40,7 +40,7 @@ SET @sql =
 --print (@sql)
 execute sp_executesql @sql
 
-SET @LogMessage = 'Rebuilding fact table ' + @SchemaName + '.' + @TableName + ' has finished'
+SET @LogMessage = 'Rebuilding dimension table ' + @SchemaName + '.D_' + @TableName + ' has finished'
 
 EXEC log.InsertFrameworkLog @ProcedureName, 'Info', @LogMessage
 

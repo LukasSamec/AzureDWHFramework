@@ -11,27 +11,29 @@ DECLARE @LogMessage AS NVARCHAR(MAX)
 
 BEGIN TRY
 
-SET @LogMessage = 'Rebuilding fact table ' + @SchemaName + '.' + @TableName + ' has started'
+SET @LogMessage = 'Rebuilding fact table ' + @SchemaName + '.F_' + @TableName + ' has started'
 
 EXEC log.InsertFrameworkLog @ProcedureName, 'Info', @LogMessage
 
-SET @sql = 'IF OBJECT_ID(''' + @SchemaName + '.D_' + @TableName + ''', N''U'') IS NOT NULL ' + 'DROP TABLE ' + @SchemaName + '.D_' + @TableName
+SET @sql = 'IF OBJECT_ID(''' + @SchemaName + '.F_' + @TableName + ''', N''U'') IS NOT NULL ' + 'DROP TABLE ' + @SchemaName + '.F_' + @TableName
 
 --print (@sql)
 execute sp_executesql @sql
 
 SET @sql = 
-'CREATE TABLE ' + @SchemaName + '.D_' + @TableName + ' ( ' +
+'CREATE TABLE ' + @SchemaName + '.F_' + @TableName + ' ( ' +
  @TableName + 'ID INT NOT NULL PRIMARY KEY IDENTITY(1,1), ' +
  (
    SELECT STRING_AGG
    (
 		CONCAT
 		(
-			'[', ColumnName, '] ', DataType, ' ', CASE WHEN Nullable = 1 THEN 'NULL' ELSE 'NOT NULL' END
+			'[', factTableColumn.ColumnName, '] ', factTableColumn.DataType, ' ', CASE WHEN factTableColumn.Nullable = 1 THEN 'NULL' ELSE 'NOT NULL' END, CASE WHEN factTableColumn.ReferenceDimensionTable IS NOT NULL THEN ' FOREIGN KEY REFERENCES ' + dimTable.SchemaName + '.D_' + dimTable.TableName + '('+ dimTable.TableName + 'ID)' END
 		) , ', '
    ) 
-	FROM conf.FactTableColumn WHERE FactTableID = @FactTableID
+	FROM conf.FactTableColumn factTableColumn 
+	LEFT JOIN conf.DimensionTable dimTable ON dimTable.DimensionTableID = factTableColumn.ReferenceDimensionTable 
+	WHERE FactTableID = @FactTableID
  ) +
 ',[InsertedID] BIGINT NOT NULL FOREIGN KEY REFERENCES log.ETLLog(ETLLogID)' +
 ',[UpdatedID] BIGINT NOT NULL FOREIGN KEY REFERENCES log.ETLLog(ETLLogID)' +
@@ -41,7 +43,7 @@ SET @sql =
 --print (@sql)
 execute sp_executesql @sql
 
-SET @LogMessage = 'Rebuilding fact table ' + @SchemaName + '.' + @TableName + ' has finished'
+SET @LogMessage = 'Rebuilding fact table ' + @SchemaName + '.F_' + @TableName + ' has finished'
 
 EXEC log.InsertFrameworkLog @ProcedureName, 'Info', @LogMessage
 

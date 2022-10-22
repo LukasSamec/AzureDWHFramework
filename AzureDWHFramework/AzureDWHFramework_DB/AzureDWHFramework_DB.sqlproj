@@ -93,6 +93,8 @@
     <Build Include="log\Stored Procedures\p_WriteETLLog.sql" />
     <Build Include="log\Stored Procedures\p_UpdateETLTableLoadLog.sql" />
     <Build Include="log\Stored Procedures\p_UpdateETLLog.sql" />
+    <Build Include="conf\Tables\TabularModel.sql" />
+    <Build Include="conf\Tables\BusinessArea.sql" />
   </ItemGroup>
   <ItemGroup>
     <ArtifactReference Include="C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\IDE\Extensions\Microsoft\SQLDB\Extensions\SqlServer\AzureV12\SqlSchemas\master.dacpac">
