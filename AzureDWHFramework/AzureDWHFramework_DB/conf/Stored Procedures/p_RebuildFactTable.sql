@@ -13,7 +13,7 @@ BEGIN TRY
 
 SET @LogMessage = 'Rebuilding fact table ' + @SchemaName + '.F_' + @TableName + ' has started'
 
-EXEC log.InsertFrameworkLog @ProcedureName, 'Info', @LogMessage
+EXEC log.p_WriteFrameworkLog @ProcedureName, 'Info', @LogMessage
 
 SET @sql = 'IF OBJECT_ID(''' + @SchemaName + '.F_' + @TableName + ''', N''U'') IS NOT NULL ' + 'DROP TABLE ' + @SchemaName + '.F_' + @TableName
 
@@ -45,11 +45,11 @@ execute sp_executesql @sql
 
 SET @LogMessage = 'Rebuilding fact table ' + @SchemaName + '.F_' + @TableName + ' has finished'
 
-EXEC log.InsertFrameworkLog @ProcedureName, 'Info', @LogMessage
+EXEC log.p_WriteFrameworkLog @ProcedureName, 'Info', @LogMessage
 
 END TRY
 BEGIN CATCH
 	DECLARE @ErrorMessage NVARCHAR(4000) = ERROR_MESSAGE()
-	EXEC log.InsertFrameworkLog @ProcedureName ,'Error', @ErrorMessage;
+	EXEC log.p_WriteFrameworkLog @ProcedureName ,'Error', @ErrorMessage;
 	THROW
 END CATCH

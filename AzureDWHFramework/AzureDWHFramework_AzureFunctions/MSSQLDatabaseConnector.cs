@@ -26,6 +26,28 @@ namespace AzureDWHFramework_TabularModelGenerator
             connection.Close();
         }
 
+        public void WriteFrameworkLog(string procedureName, string type, string message)
+        {
+            using (SqlCommand thisCommand = new SqlCommand())
+            {
+                thisCommand.CommandType = System.Data.CommandType.StoredProcedure;
+                thisCommand.CommandText = "conf.p_WriteFrameworkLog";
+                thisCommand.Connection = connection;
+
+                SqlParameter procedureNameParam = thisCommand.Parameters.Add("@ProcedureName", System.Data.SqlDbType.NVarChar);
+                procedureNameParam.Value = procedureName;
+
+                SqlParameter typeParam = thisCommand.Parameters.Add("@Type", System.Data.SqlDbType.NVarChar);
+                typeParam.Value = type;
+
+                SqlParameter messageParam = thisCommand.Parameters.Add("@Message", System.Data.SqlDbType.NVarChar);
+                messageParam.Value = message;
+
+                SqlDataReader dr = thisCommand.ExecuteReader();
+                dr.Close();
+            }
+        }
+
         public DataTable GetTabularModels()
         {
             DataTable result = new DataTable();
@@ -78,7 +100,6 @@ namespace AzureDWHFramework_TabularModelGenerator
 
                 SqlParameter tableNameParam = thisCommand.Parameters.Add("@TableName", System.Data.SqlDbType.NVarChar);
                 tableNameParam.Value = tableName;
-
 
                 SqlDataReader dr = thisCommand.ExecuteReader();
                 result.Load(dr);

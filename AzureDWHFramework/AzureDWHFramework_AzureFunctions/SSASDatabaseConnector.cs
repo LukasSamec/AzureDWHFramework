@@ -43,14 +43,14 @@ namespace AzureDWHFramework_TabularModelGenerator
             return authenticationResult.AccessToken;
         }
 
-        public void RebuildTabularModel(string name, string databaseConnectionString)
+        public void RebuildTabularModel(string modelName, string databaseConnectionString)
         {
-            if (server.Databases.FindByName(name) == null)
+            if (server.Databases.FindByName(modelName) == null)
             {
                 Database newDatabase = new Database()
                 {
-                    Name = name,
-                    ID = name,
+                    Name = modelName,
+                    ID = modelName,
                     CompatibilityLevel = 1500,
                     StorageEngineUsed = StorageEngineUsed.TabularMetadata,
                 };
@@ -63,8 +63,6 @@ namespace AzureDWHFramework_TabularModelGenerator
                     Name = "DWH",
                     ConnectionString = databaseConnectionString,
                     ImpersonationMode = Microsoft.AnalysisServices.Tabular.ImpersonationMode.ImpersonateServiceAccount,
-                    //Account = @".\Administrator",
-                    //Password = "P@ssw0rd",
                 });
                 server.Databases.Add(newDatabase);
                 newDatabase.Update(UpdateOptions.ExpandFull);
@@ -75,17 +73,17 @@ namespace AzureDWHFramework_TabularModelGenerator
         {
             foreach (DataRow table in tables.Rows)
             {
-                string name = table["TableName"].ToString();
+                string tableName = table["TableName"].ToString();
                 string sourceQuery = table["SourceQuery"].ToString();
 
                 Table newTable = new Table
                 {
-                    Name = database.Model.Tables.GetNewName(name),
+                    Name = database.Model.Tables.GetNewName(tableName),
                     Partitions =
                     {
                         new Partition()
                         {
-                            Name = name,
+                            Name = tableName,
                             Source = new QueryPartitionSource()
                             {
                                 DataSource = database.Model.DataSources["DWH"],

@@ -70,7 +70,6 @@
     <Build Include="Security\conf.sql" />
     <Build Include="conf\Stored Procedures\p_RebuildAllStageTables.sql" />
     <Build Include="log\Tables\FrameworkLog.sql" />
-    <Build Include="log\Stored Procedures\InsertFrameworkLog.sql" />
     <Build Include="conf\Tables\StageTableColumn.sql" />
     <Build Include="conf\Tables\StageTable.sql" />
     <Build Include="conf\Tables\DimensionTableColumn.sql" />
@@ -98,6 +97,7 @@
     <Build Include="conf\Stored Procedures\p_GetTabularModels.sql" />
     <Build Include="conf\Stored Procedures\p_GetTablesForTabularModel.sql" />
     <Build Include="conf\Stored Procedures\p_GetColumnsForTablesInTabularModel.sql" />
+    <Build Include="log\Stored Procedures\p_WriteFrameworkLog.sql" />
   </ItemGroup>
   <ItemGroup>
     <ArtifactReference Include="C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\IDE\Extensions\Microsoft\SQLDB\Extensions\SqlServer\AzureV12\SqlSchemas\master.dacpac">

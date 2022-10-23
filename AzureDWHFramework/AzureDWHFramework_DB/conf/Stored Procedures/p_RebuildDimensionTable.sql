@@ -12,7 +12,7 @@ BEGIN TRY
 
 SET @LogMessage = 'Rebuilding dimension table ' + @SchemaName + '.D_' + @TableName + ' has started'
 
-EXEC log.InsertFrameworkLog @ProcedureName, 'Info', @LogMessage
+EXEC log.p_WriteFrameworkLog @ProcedureName, 'Info', @LogMessage
 
 SET @sql = 'IF OBJECT_ID(''' + @SchemaName + '.D_' + @TableName + ''', N''U'') IS NOT NULL ' + 'DROP TABLE ' + @SchemaName + '.D_' + @TableName
 
@@ -42,11 +42,11 @@ execute sp_executesql @sql
 
 SET @LogMessage = 'Rebuilding dimension table ' + @SchemaName + '.D_' + @TableName + ' has finished'
 
-EXEC log.InsertFrameworkLog @ProcedureName, 'Info', @LogMessage
+EXEC log.p_WriteFrameworkLog @ProcedureName, 'Info', @LogMessage
 
 END TRY
 BEGIN CATCH
 	DECLARE @ErrorMessage NVARCHAR(4000) = ERROR_MESSAGE()
-	EXEC log.InsertFrameworkLog @ProcedureName ,'Error', @ErrorMessage;
+	EXEC log.p_WriteFrameworkLog @ProcedureName ,'Error', @ErrorMessage;
 	THROW
 END CATCH
