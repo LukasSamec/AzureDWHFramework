@@ -21,11 +21,6 @@ namespace AzureDWHFramework_TabularModelGenerator
             connection.Open();
         }
 
-        public void CloseConnection()
-        {
-            connection.Close();
-        }
-
         public void WriteFrameworkLog(string procedureName, string type, string message)
         {
             using (SqlCommand thisCommand = new SqlCommand())
