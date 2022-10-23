@@ -97,8 +97,8 @@
     <Build Include="conf\Stored Procedures\p_GetTabularModels.sql" />
     <Build Include="conf\Stored Procedures\p_GetTablesForTabularModel.sql" />
     <Build Include="conf\Stored Procedures\p_GetColumnsForTablesInTabularModel.sql" />
-    <Build Include="log\Stored Procedures\p_WriteFrameworkLog.sql" />
     <Build Include="conf\Stored Procedures\p_GetRelationshipsForTabularModel.sql" />
+    <Build Include="log\Stored Procedures\p_WriteFrameworkLog.sql" />
   </ItemGroup>
   <ItemGroup>
     <ArtifactReference Include="C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\IDE\Extensions\Microsoft\SQLDB\Extensions\SqlServer\AzureV12\SqlSchemas\master.dacpac">
