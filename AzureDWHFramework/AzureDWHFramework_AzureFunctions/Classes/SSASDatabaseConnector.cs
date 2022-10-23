@@ -10,6 +10,7 @@ using Database = Microsoft.AnalysisServices.Database;
 using DataColumn = Microsoft.AnalysisServices.Tabular.DataColumn;
 using DataType = Microsoft.AnalysisServices.DataType;
 using Partition = Microsoft.AnalysisServices.Tabular.Partition;
+using Relationship = Microsoft.AnalysisServices.Tabular.Relationship;
 using Server = Microsoft.AnalysisServices.Server;
 
 namespace AzureDWHFramework_TabularModelGenerator
@@ -78,7 +79,7 @@ namespace AzureDWHFramework_TabularModelGenerator
 
                 Table newTable = new Table
                 {
-                    Name = database.Model.Tables.GetNewName(tableName),
+                    Name = tableName,
                     Partitions =
                     {
                         new Partition()
@@ -115,6 +116,37 @@ namespace AzureDWHFramework_TabularModelGenerator
                 };
 
                 table.Columns.Add(newColumn);
+            }
+
+            database.Update(UpdateOptions.ExpandFull);
+        }
+
+        public void RebuildTablarModelRelationships(Database database, DataTable relationships)
+        {
+
+            foreach (DataRow relationship in relationships.Rows)
+            {
+                string columnName = relationship["ColumnName"].ToString();
+                string tableNName = relationship["TableN"].ToString();
+                string tableOneName = relationship["TableOne"].ToString();
+
+                Table tableN = database.Model.Tables.Find(tableNName);
+                Table tableOne = database.Model.Tables.Find(tableOneName);
+
+                DataColumn tableNColumn = (DataColumn)tableN.Columns.Find(columnName);
+                DataColumn tableOneColumn = (DataColumn)tableOne.Columns.Find(columnName);
+
+                SingleColumnRelationship newRalationship = new SingleColumnRelationship()
+                {
+                    FromCardinality = RelationshipEndCardinality.Many,
+                    ToCardinality = RelationshipEndCardinality.One,
+
+                    FromColumn = tableNColumn,
+                    ToColumn = tableOneColumn
+                };
+
+                database.Model.Relationships.Add(newRalationship);
+
             }
 
             database.Update(UpdateOptions.ExpandFull);

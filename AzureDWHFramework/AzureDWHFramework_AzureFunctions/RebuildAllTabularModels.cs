@@ -66,6 +66,9 @@ namespace AzureDWHFramework_TabularModelGenerator
                         DataTable columns = databaseConnector.GetColumnsForTableInTabularModel(modelName, tableName);
                         ssasConnector.RebuildTableColumns(database, columns, tableName);
                     }
+
+                    DataTable relationships = databaseConnector.GetRelationshipsForTabularModel(modelName);
+                    ssasConnector.RebuildTablarModelRelationships(database, relationships);
                 }
 
                 databaseConnector.CloseConnection();
@@ -73,7 +76,7 @@ namespace AzureDWHFramework_TabularModelGenerator
             catch(Exception ex)
             {
                 databaseConnector.WriteFrameworkLog(functionName, "Error", ex.Message);
-                return new OkObjectResult("Rebuild all tabular models has ended with error \r\n " + ex.Message);
+                return new BadRequestObjectResult("Rebuild all tabular models has ended with error \r\n" + ex.Message + "\r\n" + ex.StackTrace);
             }
 
             databaseConnector.WriteFrameworkLog(functionName, "Info", "Rebuild all tabular models has finished successfully");

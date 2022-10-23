@@ -31,7 +31,7 @@ namespace AzureDWHFramework_TabularModelGenerator
             using (SqlCommand thisCommand = new SqlCommand())
             {
                 thisCommand.CommandType = System.Data.CommandType.StoredProcedure;
-                thisCommand.CommandText = "conf.p_WriteFrameworkLog";
+                thisCommand.CommandText = "log.p_WriteFrameworkLog";
                 thisCommand.Connection = connection;
 
                 SqlParameter procedureNameParam = thisCommand.Parameters.Add("@ProcedureName", System.Data.SqlDbType.NVarChar);
@@ -100,6 +100,26 @@ namespace AzureDWHFramework_TabularModelGenerator
 
                 SqlParameter tableNameParam = thisCommand.Parameters.Add("@TableName", System.Data.SqlDbType.NVarChar);
                 tableNameParam.Value = tableName;
+
+                SqlDataReader dr = thisCommand.ExecuteReader();
+                result.Load(dr);
+                dr.Close();
+
+                return result;
+            }
+        }
+
+        public DataTable GetRelationshipsForTabularModel(string tabularModel)
+        {
+            DataTable result = new DataTable();
+            using (SqlCommand thisCommand = new SqlCommand())
+            {
+                thisCommand.CommandType = System.Data.CommandType.StoredProcedure;
+                thisCommand.CommandText = "conf.p_GetRelationshipsForTabularModel";
+                thisCommand.Connection = connection;
+
+                SqlParameter tabularModelParam = thisCommand.Parameters.Add("@TabularModel", System.Data.SqlDbType.NVarChar);
+                tabularModelParam.Value = tabularModel;
 
                 SqlDataReader dr = thisCommand.ExecuteReader();
                 result.Load(dr);
