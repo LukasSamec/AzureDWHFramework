@@ -12,7 +12,7 @@ BEGIN TRY
 EXEC log.p_WriteFrameworkLog @ProcedureName, 'Info',  'Rebuilding all dimension tables has started';
 
 DECLARE dimensionTable CURSOR FOR
-SELECT DimensionTableID, SchemaName, TableName from conf.DimensionTable
+SELECT DimensionTableID, SchemaName, TableName FROM conf.DimensionTable
 
 OPEN dimensionTable
 FETCH NEXT FROM dimensionTable INTO @DimensionTableID, @SchemaName, @TableName

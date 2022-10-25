@@ -11,7 +11,7 @@ BEGIN TRY
 EXEC log.p_WriteFrameworkLog @ProcedureName, 'Info',  'Rebuilding all stage tables has started';
 
 DECLARE stageTable CURSOR FOR
-SELECT StageTableID, SchemaName, TableName from conf.StageTable
+SELECT StageTableID, SchemaName, TableName FROM conf.StageTable
 
 OPEN stageTable
 FETCH NEXT FROM stageTable INTO @StageTableID, @SchemaName, @TableName

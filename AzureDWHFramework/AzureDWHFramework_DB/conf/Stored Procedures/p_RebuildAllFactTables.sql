@@ -13,7 +13,7 @@ BEGIN TRY
 EXEC log.p_WriteFrameworkLog @ProcedureName, 'Info',  'Rebuilding all fact tables has started';
 
 DECLARE factTable CURSOR FOR
-SELECT FactTableID, SchemaName, TableName from conf.FactTable
+SELECT FactTableID, SchemaName, TableName FROM conf.FactTable
 
 OPEN factTable
 FETCH NEXT FROM factTable INTO @FactTableID, @SchemaName, @TableName

@@ -16,7 +16,7 @@ EXEC log.p_WriteFrameworkLog @ProcedureName, 'Info', @LogMessage
 SET @sql = 'IF OBJECT_ID(''' + @SchemaName + '.' + @TableName + ''', N''U'') IS NOT NULL ' + 'DROP TABLE ' + @SchemaName + '.' + @TableName
 
 --print (@sql)
-execute sp_executesql @sql
+EXEC sp_executesql @sql
 
 SET @sql = 
 'CREATE TABLE ' + @SchemaName + '.' + @TableName + ' (' +
@@ -36,7 +36,7 @@ SET @sql =
 
 
 --print (@sql)
-execute sp_executesql @sql
+EXEC sp_executesql @sql
 
 SET @LogMessage = 'Rebuilding stage table ' + @SchemaName + '.' + @TableName + ' has finished'
 
