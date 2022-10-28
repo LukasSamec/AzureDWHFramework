@@ -2,7 +2,7 @@
 	@PipelineRunId			NVARCHAR(255),
 	@PipelineName			NVARCHAR(255),
 	@PipelineTriggerId		NVARCHAR(255),
-	@PipelineTriggerTime	datetime2,
+	@PipelineTriggerTime	datetime2(7) = GETUTCDATE,
 	@Status					int,
 	@StatusDescription		NVARCHAR(255)
 AS
@@ -11,5 +11,6 @@ AS
 	VALUES (@PipelineRunId, @PipelineName, @PipelineTriggerId, @PipelineTriggerTime, @Status , @StatusDescription)
 
 	SELECT SCOPE_IDENTITY() AS [SCOPE_IDENTITY]
+
 
 RETURN 0

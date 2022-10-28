@@ -13,7 +13,7 @@ DECLARE @StageTableSchema AS NVARCHAR(255) = (
   stageTable.SchemaName
   FROM
   conf.DimensionTable dimTable
-  INNER JOIN conf.DimensionTableColumn dimTableColumn ON dimTable.DimensionTableID = dimTable.DimensionTableID
+  INNER JOIN conf.DimensionTableColumn dimTableColumn ON dimTable.DimensionTableID = dimTableColumn.DimensionTableID
   INNER JOIN conf.StageTableColumn stageTableColumn ON stageTableColumn.StageTableColumnID = dimTableColumn.StageTableColumnID
   INNER JOIN conf.StageTable stageTable ON stageTable.StageTableID = stageTableColumn.StageTableID
 )
@@ -24,7 +24,7 @@ DECLARE @StageTableName AS NVARCHAR(255) = (
   stageTable.TableName
   FROM
   conf.DimensionTable dimTable
-  INNER JOIN conf.DimensionTableColumn dimTableColumn ON dimTable.DimensionTableID = dimTable.DimensionTableID
+  INNER JOIN conf.DimensionTableColumn dimTableColumn ON dimTable.DimensionTableID = dimTableColumn.DimensionTableID
   INNER JOIN conf.StageTableColumn stageTableColumn ON stageTableColumn.StageTableColumnID = dimTableColumn.StageTableColumnID
   INNER JOIN conf.StageTable stageTable ON stageTable.StageTableID = stageTableColumn.StageTableID
   WHERE dimTable.DimensionTableID = @DimensionTableID
@@ -179,14 +179,15 @@ SET @sql =
   'SELECT @DeletedCount = COUNT(1) FROM @SummaryOfChanges WHERE Change = ''DELETE''' + CHAR(13)  +
   'SELECT @DateTime = GETUTCDATE()'  + CHAR(13)  +
 
-  'EXEC log.p_UpdateETLTableLoadLog @ETLTableLoadLogID, 2, ''Succeeded'', @DateTime, @InsertedCount, @UpdatedCount, @DeletedCount' + CHAR(13)  +
+  'EXEC log.p_UpdateETLTableLoadLog @ETLTableLoadLogID, 2, ''Finished'', @DateTime, @InsertedCount, @UpdatedCount, @DeletedCount' + CHAR(13)  +
 
   'END TRY' + CHAR(13) +
   'BEGIN CATCH' + CHAR(13) +
   'SELECT @DateTime = GETUTCDATE()'  + CHAR(13)  +
   'SELECT @ErrorMessage = ERROR_MESSAGE()' + CHAR(13)  +
   'EXEC log.p_UpdateETLTableLoadLog @ETLTableLoadLogID, 3, ''Failed'', @DateTime, @InsertedCount, @UpdatedCount, @DeletedCount, @ErrorMessage' + CHAR(13)  +
-   'EXEC log.p_UpdateETLLog @ETLLogID, 3, ''Failed''' + CHAR(13)  +
+  'EXEC log.p_UpdateETLLog @ETLLogID, 3, ''Failed''' + CHAR(13)  +
+  ';THROW' + CHAR(13)  +
   'END CATCH'
 
 --print (@sql)
