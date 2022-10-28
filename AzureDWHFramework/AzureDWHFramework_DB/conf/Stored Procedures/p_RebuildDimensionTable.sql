@@ -34,6 +34,7 @@ SET @sql =
  ) +
 ',[InsertedID] BIGINT NOT NULL FOREIGN KEY REFERENCES log.ETLLog(ETLLogID)' +
 ',[UpdatedID] BIGINT NOT NULL FOREIGN KEY REFERENCES log.ETLLog(ETLLogID)' +
+',[Active] BIT NOT NULL ' +
 ')'
 
 
