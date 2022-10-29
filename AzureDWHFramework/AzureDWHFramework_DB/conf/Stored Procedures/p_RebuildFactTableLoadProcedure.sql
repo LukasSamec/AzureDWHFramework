@@ -63,7 +63,6 @@ SET @sql =
  '(' + CHAR(13) +
   (
 	  SELECT 
-	  DISTINCT
 	  STRING_AGG(dimTableColumn.ColumnName, ',' + CHAR(13))
 	  FROM
 	  conf.FactTable dimTable
@@ -78,16 +77,31 @@ SET @sql =
   ')' + CHAR(13) +
  'SELECT' + CHAR(13) +
  (
- SELECT 
-		STRING_AGG(ColumnName, ', ' + CHAR(13)) 
-		FROM conf.StageTableColumn stageTableCol 
-		INNER JOIN conf.StageTable stageTable ON stageTable.StageTableID = stageTableCol.StageTableID 
-		WHERE stageTable.SchemaName = @StageTableSchema AND stageTable.TableName = @StageTableName
+	  SELECT 
+	  DISTINCT
+	  STRING_AGG(COALESCE(dimTable.TableName + 'ID', stageTableColumn.ColumnName), ',' + CHAR(13))
+	  FROM
+	  conf.FactTable factTable
+	  LEFT JOIN conf.FactTableColumn factTableColumn ON factTable.FactTableID = factTable.FactTableID
+	  LEFT JOIN conf.StageTableColumn stageTableColumn ON stageTableColumn.StageTableColumnID = factTableColumn.StageTableColumnID
+	  LEFT JOIN conf.StageTable stageTable ON stageTable.StageTableID = stageTableColumn.StageTableID
+	  LEFT JOIN conf.DimensionTable dimTable ON dimTable.DimensionTableID = factTableColumn.DimensionTableID
  ) + ',' + CHAR(13) +
   '@ETLLogID,' + CHAR(13) +
   '@ETLLogID,' + CHAR(13) +
   '1' + CHAR(13) +
-  'FROM ' + @StageTableSchema + '.' +  @StageTableName + CHAR(13) +
+  'FROM ' + @StageTableSchema + '.' +  @StageTableName + ' ' + @StageTableSchema + @StageTableName + CHAR(13) +
+  (
+	  SELECT 
+	  DISTINCT
+	  STRING_AGG(CONCAT('LEFT JOIN ', dimTable.SchemaName, '.D_', dimTable.TableName, ' ', dimTable.SchemaName, dimTable.TableName,  ' ON ', dimTable.SchemaName, dimTable.TableName, '.',dimTable.TableName, 'Code = ', stageTable.SchemaName, stageTable.TableName,  '.', stageTableColumn.ColumnName), CHAR(13))
+	  FROM
+	  conf.FactTable factTable
+	  INNER JOIN conf.FactTableColumn factTableColumn ON factTable.FactTableID = factTable.FactTableID
+	  INNER JOIN conf.StageTableColumn stageTableColumn ON stageTableColumn.StageTableColumnID = factTableColumn.StageTableColumnID
+	  INNER JOIN conf.StageTable stageTable ON stageTable.StageTableID = stageTableColumn.StageTableID
+	  INNER JOIN conf.DimensionTable dimTable ON dimTable.DimensionTableID = factTableColumn.DimensionTableID
+  )  + CHAR(13) +
 
 
   'INSERT INTO @SummaryOfChanges (Change, Code) VALUES (''INSERT'', (SELECT COUNT(*) FROM '+ @SchemaName + '.F_' + @TableName +'))' + CHAR(13) +
@@ -112,7 +126,7 @@ SET @sql =
 print (@sql)
 --EXEC sp_executesql @sql
 
-SET @LogMessage = 'Rebuilding load procedure ' + @SchemaName + '.p_load_D_' + @TableName + ' has finished'
+SET @LogMessage = 'Rebuilding load procedure ' + @SchemaName + '.p_load_F_' + @TableName + ' has finished'
 
 EXEC log.p_WriteFrameworkLog @ProcedureName, 'Info', @LogMessage
 
