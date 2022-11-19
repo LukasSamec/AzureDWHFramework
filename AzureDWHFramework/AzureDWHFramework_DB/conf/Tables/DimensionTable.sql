@@ -6,8 +6,11 @@
     [TabularModelID]   INT            NULL,
     PRIMARY KEY CLUSTERED ([DimensionTableID] ASC),
     CHECK ([LoadType]='SCD2' OR [LoadType]='SCD1'),
-    FOREIGN KEY ([TabularModelID]) REFERENCES [conf].[TabularModel] ([TabularModelID])
+    FOREIGN KEY ([TabularModelID]) REFERENCES [conf].[TabularModel] ([TabularModelID]),
+    CONSTRAINT [UQ_DimensionSchemaAndTableName] UNIQUE NONCLUSTERED ([SchemaName] ASC, [TableName] ASC)
 );
+
+
 
 
 

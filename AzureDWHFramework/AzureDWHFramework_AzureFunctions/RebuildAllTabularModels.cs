@@ -40,7 +40,7 @@ namespace AzureDWHFramework_TabularModelGenerator
                 string tenantId = keyVaultClient.GetSecretAsync(keyVaultUrl, "TenantID").Result.Value;
                 string appId = keyVaultClient.GetSecretAsync(keyVaultUrl, "TabularModelGeneratorAppID").Result.Value;
                 string appSecret = keyVaultClient.GetSecretAsync(keyVaultUrl, "TabularModelGeneratorAppSecret").Result.Value;
-                string appUrl = keyVaultClient.GetSecretAsync(keyVaultUrl, "TabularModelGeneratorURL").Result.Value;
+                string appUrl = keyVaultClient.GetSecretAsync(keyVaultUrl, "TabularModelGeneratorURI").Result.Value;
 
 
                 databaseConnector = new MSSQLDatabaseConnector(sqlConnString);

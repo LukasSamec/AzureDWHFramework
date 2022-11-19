@@ -10,8 +10,11 @@
     PRIMARY KEY CLUSTERED ([FactTableColumnID] ASC),
     FOREIGN KEY ([DimensionTableID]) REFERENCES [conf].[DimensionTable] ([DimensionTableID]),
     FOREIGN KEY ([FactTableID]) REFERENCES [conf].[FactTable] ([FactTableID]),
-    FOREIGN KEY ([StageTableColumnID]) REFERENCES [conf].[StageTableColumn] ([StageTableColumnID])
+    FOREIGN KEY ([StageTableColumnID]) REFERENCES [conf].[StageTableColumn] ([StageTableColumnID]),
+    CONSTRAINT [UQ_FactColumnTableNameAndColumnName] UNIQUE NONCLUSTERED ([FactTableID] ASC, [ColumnName] ASC)
 );
+
+
 
 
 

@@ -5,6 +5,9 @@
     [DataType]           NVARCHAR (255) NOT NULL,
     [Nullable]           BIT            NOT NULL,
     PRIMARY KEY CLUSTERED ([StageTableColumnID] ASC),
-    FOREIGN KEY ([StageTableID]) REFERENCES [conf].[StageTable] ([StageTableID])
+    FOREIGN KEY ([StageTableID]) REFERENCES [conf].[StageTable] ([StageTableID]),
+    CONSTRAINT [UQ_StageColumnTableNameAndColumnName] UNIQUE NONCLUSTERED ([StageTableID] ASC, [ColumnName] ASC)
 );
+
+
 
