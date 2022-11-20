@@ -52,8 +52,7 @@ namespace AzureDWHFramework_TabularModelGenerator
                 {
                     Name = modelName,
                     ID = modelName,
-                    CompatibilityLevel = 1500,
-                    StorageEngineUsed = StorageEngineUsed.TabularMetadata,
+                    CompatibilityLevel = 1500
                 };
                 newDatabase.Model = new Model()
                 {
