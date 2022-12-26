@@ -63,6 +63,7 @@
     <Folder Include="log\" />
     <Folder Include="log\Tables\" />
     <Folder Include="log\Stored Procedures\" />
+    <Folder Include="conf\Functions\" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="conf\Stored Procedures\p_RebuildStageTable.sql" />
@@ -103,6 +104,8 @@
     <Build Include="conf\Stored Procedures\p_RebuildFactTableLoadProcedure.sql" />
     <Build Include="conf\Tables\FactTable_TabularModel.sql" />
     <Build Include="conf\Tables\DimensionTable_TabularModel.sql" />
+    <Build Include="conf\Functions\f_GetStageTableColumnsSortedByIDForDimensionTable.sql" />
+    <Build Include="conf\Functions\f_GetDimensionTableColumnsSortedByID.sql" />
   </ItemGroup>
   <ItemGroup>
     <ArtifactReference Include="C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\IDE\Extensions\Microsoft\SQLDB\Extensions\SqlServer\AzureV12\SqlSchemas\master.dacpac">
