@@ -53,7 +53,7 @@ SET @sql =
 'DECLARE @UpdatedCount INT = 0' + CHAR(13) +
 'DECLARE @SummaryOfChanges TABLE (ID INT IDENTITY(1,1), Change NVARCHAR(20), Code INT) ' + CHAR(13) +
 'BEGIN TRY' + CHAR(13) +
-'EXEC log.p_WriteETLTableLoadLog @ETLLogID,''' +  @SchemaName + '.p_load_D_' + @TableName + ''', ''' + @SchemaName + ' '', ''D_' + @TableName + ''',''Stored procedure'', 1, ''Running'', @ETLTableLoadLogID OUTPUT' + CHAR(13) +
+'EXEC log.p_WriteETLTableLoadLog @ETLLogID = @ETLLogID, @Name = ''' +  @SchemaName + '.p_load_D_' + @TableName + ''', @TargetSchemaName = ''' + @SchemaName + ' '', @TargetTableName = ''D_' + @TableName + ''', @Type = ''Stored procedure'', @Status = 1, @StatusDescription = ''Running'', @NewETLTableLoadLogID = @ETLTableLoadLogID OUTPUT' + CHAR(13) +
 
 'IF NOT EXISTS (SELECT 1 FROM '+ @SchemaName + '.D_' + @TableName +' WHERE ' + @TableName + 'ID = -1)' + CHAR(13) +
 'BEGIN' + CHAR(13) +
@@ -72,8 +72,8 @@ SET @sql =
 	  INNER JOIN conf.StageTable stageTable ON stageTable.StageTableID = stageTableColumn.StageTableID
 	  WHERE dimTable.DimensionTableID = @DimensionTableID
 ) + ',' + CHAR(13) +
-  'InsertedID,' + CHAR(13) +
-  'UpdatedID,' + CHAR(13) +
+  'InsertedETLLogID,' + CHAR(13) +
+  'UpdatedETLLogID,' + CHAR(13) +
   'Active' + CHAR(13) +
   ')'+ CHAR(13) +
   'VALUES' + CHAR(13) +
@@ -104,9 +104,10 @@ SET @sql =
 'SELECT ' + CHAR(13) +
 	(
 		SELECT 
-		STRING_AGG(ColumnName, ', ' + CHAR(13)) 
+		STRING_AGG(stageTableCol .ColumnName, ', ' + CHAR(13)) 
 		FROM conf.StageTableColumn stageTableCol 
 		INNER JOIN conf.StageTable stageTable ON stageTable.StageTableID = stageTableCol.StageTableID 
+		INNER JOIN conf.DimensionTableColumn dimTableCol ON dimTableCol.StageTableColumnID = stageTableCol.StageTableColumnID
 		WHERE stageTable.SchemaName = @StageTableSchema AND stageTable.TableName = @StageTableName
 	) + CHAR(13) +
 	'FROM ' + @StageTableSchema + '.' +  @StageTableName + CHAR(13) +
@@ -134,37 +135,29 @@ SET @sql =
 	  INNER JOIN conf.StageTable stageTable ON stageTable.StageTableID = stageTableColumn.StageTableID
 	  WHERE dimTableColumn.BusinessKey <> 1 AND dimTable.DimensionTableID = @DimensionTableID
   ) +','+ CHAR(13) +
-  'target.UpdatedID = @ETLLogID,' + CHAR(13) +
+  'target.UpdatedETLLogID = @ETLLogID,' + CHAR(13) +
   'target.Active = 1' + CHAR(13) +
   'WHEN NOT MATCHED THEN INSERT' + CHAR(13) +
   '(' + CHAR(13) +
   (
 	  SELECT 
-	  DISTINCT
-	  STRING_AGG(dimTableColumn.ColumnName, ',' + CHAR(13))
+	  STRING_AGG(ColumnName, ',' + CHAR(13))
 	  FROM
-	  conf.DimensionTable dimTable
-	  INNER JOIN conf.DimensionTableColumn dimTableColumn ON dimTable.DimensionTableID = dimTable.DimensionTableID
-	  INNER JOIN conf.StageTableColumn stageTableColumn ON stageTableColumn.StageTableColumnID = dimTableColumn.StageTableColumnID
-	  INNER JOIN conf.StageTable stageTable ON stageTable.StageTableID = stageTableColumn.StageTableID
-	  WHERE dimTable.DimensionTableID = @DimensionTableID
+	  conf.f_GetDimensionTableColumnsSortedByID(@DimensionTableID)
+
   ) + ',' + CHAR(13) +
-  'InsertedID,' + CHAR(13) +
-  'UpdatedID,' + CHAR(13) +
+  'InsertedETLLogID,' + CHAR(13) +
+  'UpdatedETLLogID,' + CHAR(13) +
   'Active' + CHAR(13) +
   ')' + CHAR(13) +
   'VALUES' + CHAR(13) +
   '(' + CHAR(13) +
   (
 	  SELECT 
-	  DISTINCT
-	  STRING_AGG(CONCAT('source.', stageTableColumn.ColumnName), ',' + CHAR(13))
+	  STRING_AGG(CONCAT('source.', ColumnName), ',' + CHAR(13))
 	  FROM
-	  conf.DimensionTable dimTable
-	  INNER JOIN conf.DimensionTableColumn dimTableColumn ON dimTable.DimensionTableID = dimTable.DimensionTableID
-	  INNER JOIN conf.StageTableColumn stageTableColumn ON stageTableColumn.StageTableColumnID = dimTableColumn.StageTableColumnID
-	  INNER JOIN conf.StageTable stageTable ON stageTable.StageTableID = stageTableColumn.StageTableID
-	  WHERE dimTable.DimensionTableID = @DimensionTableID
+	  conf.f_GetStageTableColumnsSortedByIDForDimensionTable(@DimensionTableID)
+	  
   )  +','+ CHAR(13)  +
   +'@ETLLogID,'+ CHAR(13)  +
   +'@ETLLogID,'+ CHAR(13)  +
@@ -179,19 +172,19 @@ SET @sql =
   'SELECT @DeletedCount = COUNT(1) FROM @SummaryOfChanges WHERE Change = ''DELETE''' + CHAR(13)  +
   'SELECT @DateTime = GETUTCDATE()'  + CHAR(13)  +
 
-  'EXEC log.p_UpdateETLTableLoadLog @ETLTableLoadLogID, 2, ''Finished'', @DateTime, @InsertedCount, @UpdatedCount, @DeletedCount' + CHAR(13)  +
+  'EXEC log.p_UpdateETLTableLoadLog @ETLTableLoadLogID, 2, ''Finished'', @InsertedCount, @UpdatedCount, @DeletedCount' + CHAR(13)  +
 
   'END TRY' + CHAR(13) +
   'BEGIN CATCH' + CHAR(13) +
   'SELECT @DateTime = GETUTCDATE()'  + CHAR(13)  +
   'SELECT @ErrorMessage = ERROR_MESSAGE()' + CHAR(13)  +
-  'EXEC log.p_UpdateETLTableLoadLog @ETLTableLoadLogID, 3, ''Failed'', @DateTime, @InsertedCount, @UpdatedCount, @DeletedCount, @ErrorMessage' + CHAR(13)  +
+  'EXEC log.p_UpdateETLTableLoadLog @ETLTableLoadLogID, 3, ''Failed'', @InsertedCount, @UpdatedCount, @DeletedCount, @ErrorMessage' + CHAR(13)  +
   'EXEC log.p_UpdateETLLog @ETLLogID, 3, ''Failed''' + CHAR(13)  +
   ';THROW' + CHAR(13)  +
   'END CATCH'
 
---print (@sql)
-EXEC sp_executesql @sql
+ --EXEC dbo.p_PrintLongText @sql
+ EXEC sp_executesql @sql
 
 SET @LogMessage = 'Rebuilding load procedure ' + @SchemaName + '.p_load_D_' + @TableName + ' has finished'
 

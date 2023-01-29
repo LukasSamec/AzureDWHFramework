@@ -8,8 +8,11 @@
     [StageTableColumnID]     INT            NOT NULL,
     PRIMARY KEY CLUSTERED ([DimensionTableColumnID] ASC),
     FOREIGN KEY ([DimensionTableID]) REFERENCES [conf].[DimensionTable] ([DimensionTableID]),
-    FOREIGN KEY ([StageTableColumnID]) REFERENCES [conf].[StageTableColumn] ([StageTableColumnID])
+    FOREIGN KEY ([StageTableColumnID]) REFERENCES [conf].[StageTableColumn] ([StageTableColumnID]),
+    CONSTRAINT [UQ_DimensionColumnTableNameAndColumnName] UNIQUE NONCLUSTERED ([DimensionTableID] ASC, [ColumnName] ASC)
 );
+
+
 
 
 

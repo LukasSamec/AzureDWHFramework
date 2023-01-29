@@ -7,7 +7,8 @@ SELECT
 ColumnName,
 DataType
 FROM conf.DimensionTable dimTable
-INNER JOIN conf.TabularModel tabModel ON tabModel.TabularModelID = dimTable.TabularModelID
+ INNER JOIN conf.DimensionTable_TabularModel dimTab on dimtable.DimensionTableID = dimtab.DimensionTableID
+INNER JOIN conf.TabularModel tabModel ON tabModel.TabularModelID = dimTab.TabularModelID
 INNER JOIN conf.DimensionTableColumn dimTableCol ON dimTableCol.DimensionTableID = dimTable.DimensionTableID
 WHERE TabularModelName = @TabularModel AND TableName = @TableName
 
@@ -17,7 +18,8 @@ SELECT
 CONCAT(dimTable.TableName,'ID') ColumnName,
 'INT' DataType
 FROM conf.DimensionTable dimTable
-INNER JOIN conf.TabularModel tabModel ON tabModel.TabularModelID = dimTable.TabularModelID
+INNER JOIN conf.DimensionTable_TabularModel dimTab on dimtable.DimensionTableID = dimtab.DimensionTableID
+INNER JOIN conf.TabularModel tabModel ON tabModel.TabularModelID = dimTab.TabularModelID
 WHERE TabularModelName = @TabularModel AND TableName = @TableName
 
 UNION ALL
@@ -26,6 +28,7 @@ SELECT
 ColumnName,
 DataType
 FROM conf.FactTable factTable
-INNER JOIN conf.TabularModel tabModel ON tabModel.TabularModelID = factTable.TabularModelID
+INNER JOIN conf.FactTable_TabularModel factTab on facttable.FactTableID = facttab.FactTableID
+INNER JOIN conf.TabularModel tabModel ON tabModel.TabularModelID = factTab.TabularModelID
 INNER JOIN conf.FactTableColumn factTableCol ON factTableCol.FactTableID = factTable.FactTableID
 WHERE TabularModelName = @TabularModel AND TableName = @TableName
