@@ -36,6 +36,8 @@ namespace AzureDWHFramework_TabularModelGenerator
                 string ssasConnString = keyVaultClient.GetSecretAsync(keyVaultUrl, "SSASConnectionString").Result.Value;
 
                 string ssasDataSourceConnString = keyVaultClient.GetSecretAsync(keyVaultUrl, "SSASDataSourceConnectionString").Result.Value;
+                string ssasDataSourceAccount = keyVaultClient.GetSecretAsync(keyVaultUrl, "SSASDataSourceAccount").Result.Value;
+                string ssasDataSourcePassword = keyVaultClient.GetSecretAsync(keyVaultUrl, "SSASDataSourceAccountPassword").Result.Value;
 
                 string tenantId = keyVaultClient.GetSecretAsync(keyVaultUrl, "TenantID").Result.Value;
                 string appId = keyVaultClient.GetSecretAsync(keyVaultUrl, "TabularModelGeneratorAppID").Result.Value;
@@ -55,7 +57,7 @@ namespace AzureDWHFramework_TabularModelGenerator
                 foreach (DataRow tabularModel in tabularModels.Rows)
                 {
                     string modelName = tabularModel["TabularModelName"].ToString();
-                    ssasConnector.RebuildTabularModel(modelName, ssasDataSourceConnString);
+                    ssasConnector.RebuildTabularDatabase(modelName, ssasDataSourceConnString, ssasDataSourceAccount, ssasDataSourcePassword);
                     Database database = server.Databases.FindByName(modelName);
                     DataTable tables = databaseConnector.GetTablesForTabularModel(modelName);
                     ssasConnector.RebuildTabularModelTables(database, tables);

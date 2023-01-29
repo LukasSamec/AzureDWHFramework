@@ -44,28 +44,42 @@ namespace AzureDWHFramework_TabularModelGenerator
             return authenticationResult.AccessToken;
         }
 
-        public void RebuildTabularModel(string modelName, string databaseConnectionString)
+        /// <summary>
+        /// Metoda vytvářenící novou analytickou databázi, její model a datové zdroj s připojením k datovému skladu.
+        /// </summary>
+        /// <param name="databaseName">Název analytické databáze</param>
+        /// <param name="databaseConnectionString">Připojovací řetězec k datovému skladu, který je získáván z Key Vault klíče s názvem SSASDataSourceConnectionString.</param>
+        /// <param name="account">Název účtu, který se při procesu připojuje k datovému skladu. Hodnota je získávána z Key Vault klíče s názvem SSASDataSourceAccount.</param>
+        /// <param name="accountPassword">Heslo účtu, který se při procesu připojuje k datovému skladu. Hodnota je získávána z Key Vault klíče s názvem SSASDataSourceAccountPassword.</param>
+        public void RebuildTabularDatabase(string databaseName, string databaseConnectionString, string account, string accountPassword)
         {
-            if (server.Databases.FindByName(modelName) == null)
+            // Kontrola, zda databáze již existuje. Pokud neexistuje, vytvoří se nová.
+            if (server.Databases.FindByName(databaseName) == null)
             {
+                //Založení bojektu databáze.
                 Database newDatabase = new Database()
                 {
-                    Name = modelName,
-                    ID = modelName,
-                    CompatibilityLevel = 1600,
-                    StorageEngineUsed = StorageEngineUsed.TabularMetadata,
+                    Name = databaseName,
+                    ID = databaseName,
+                    CompatibilityLevel = 1600
                 };
+                // Přiřazení nového modelu k databázi.
                 newDatabase.Model = new Model()
                 {
                     Name = "Model",
                 };
+                // Přiřazení datového zdroje k databázi.
                 newDatabase.Model.DataSources.Add(new ProviderDataSource()
                 {
                     Name = "DWH",
                     ConnectionString = databaseConnectionString,
-                    ImpersonationMode = Microsoft.AnalysisServices.Tabular.ImpersonationMode.ImpersonateServiceAccount,
+                    ImpersonationMode = Microsoft.AnalysisServices.Tabular.ImpersonationMode.ImpersonateAccount,
+                    Account = account,
+                    Password = accountPassword
                 });
+                // Přidání databáze na server.
                 server.Databases.Add(newDatabase);
+                // Nahrání změn na server.
                 newDatabase.Update(UpdateOptions.ExpandFull);
             }
         }
