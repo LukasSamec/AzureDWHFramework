@@ -8,10 +8,11 @@ using System.Text;
 using System.Threading.Tasks;
 using Database = Microsoft.AnalysisServices.Database;
 using DataColumn = Microsoft.AnalysisServices.Tabular.DataColumn;
-using DataType = Microsoft.AnalysisServices.DataType;
+using DataType = Microsoft.AnalysisServices.Tabular.DataType;
 using Partition = Microsoft.AnalysisServices.Tabular.Partition;
 using Relationship = Microsoft.AnalysisServices.Tabular.Relationship;
 using Server = Microsoft.AnalysisServices.Server;
+
 
 namespace AzureDWHFramework_TabularModelGenerator
 {
@@ -120,12 +121,35 @@ namespace AzureDWHFramework_TabularModelGenerator
 
             foreach(DataRow column in columns.Rows)
             {
-                string columnName = column["ColumnName"].ToString();
-                string dataType = column["DataType"].ToString();
-                DataColumn newColumn = new DataColumn()
+               string columnName = column["ColumnName"].ToString();
+
+               DataType tabularDataType = DataType.Unknown;
+
+                switch(column["DataType"].ToString())
+                {
+                    case "STRING":
+                        tabularDataType = DataType.String;
+                        break;
+                    case "DOUBLE":
+                        tabularDataType = DataType.Double;
+                        break;
+                    case "INT64":
+                        tabularDataType = DataType.Int64;
+                        break;
+                    case "BOOLEAN":
+                        tabularDataType = DataType.Boolean;
+                        break;
+                    case "DATETIME":
+                        tabularDataType = DataType.DateTime;
+                        break;
+                }
+
+
+
+               DataColumn newColumn = new DataColumn()
                 {
                     Name = columnName,
-                    DataType = (Microsoft.AnalysisServices.Tabular.DataType)DataType.String,
+                    DataType = tabularDataType,
                     SourceColumn = columnName,
                 };
 
