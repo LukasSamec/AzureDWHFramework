@@ -43,6 +43,23 @@ namespace AzureDWHFramework_TabularModelGenerator
             }
         }
 
+        public DataTable GetDataStructuresDocumentationData()
+        {
+            DataTable result = new DataTable();
+            using (SqlCommand thisCommand = new SqlCommand())
+            {
+                thisCommand.CommandType = System.Data.CommandType.StoredProcedure;
+                thisCommand.CommandText = "conf.p_GetDataObjectsDocumentationData";
+                thisCommand.Connection = connection;
+
+                SqlDataReader dr = thisCommand.ExecuteReader();
+                result.Load(dr);
+                dr.Close();
+
+                return result;
+            }
+        }
+
         public DataTable GetTabularModels()
         {
             DataTable result = new DataTable();
