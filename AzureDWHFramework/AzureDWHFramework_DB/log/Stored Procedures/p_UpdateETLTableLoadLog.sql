@@ -2,7 +2,6 @@
 	@ETLTableLoadLogID	INT,
 	@Status				INT,
 	@StatusDescription	NVARCHAR(255),
-	@EndTime			NVARCHAR(255),
 	@Inserted			INT,
 	@Updated			INT,
 	@Deleted			INT,

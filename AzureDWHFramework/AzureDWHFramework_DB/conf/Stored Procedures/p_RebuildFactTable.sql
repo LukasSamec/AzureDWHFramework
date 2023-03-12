@@ -35,14 +35,24 @@ SET @sql =
 	LEFT JOIN conf.DimensionTable dimTable ON dimTable.DimensionTableID = factTableColumn.DimensionTableID
 	WHERE FactTableID = @FactTableID
  ) +
-',[InsertedID] BIGINT NOT NULL FOREIGN KEY REFERENCES log.ETLLog(ETLLogID)' +
-',[UpdatedID] BIGINT NOT NULL FOREIGN KEY REFERENCES log.ETLLog(ETLLogID)' +
+',[InsertedETLLogID] BIGINT NOT NULL FOREIGN KEY REFERENCES log.ETLLog(ETLLogID)' +
+',[UpdatedETLLogID] BIGINT NOT NULL FOREIGN KEY REFERENCES log.ETLLog(ETLLogID)' +
 ',[Active] BIT NOT NULL' +
 ')'
 
 
 --print (@sql)
 EXEC sp_executesql @sql
+
+INSERT INTO conf.FactTable_BusinessArea
+(
+FactTableID, 
+BusinessAreaID
+)
+SELECT FactTable.FactTableID, businessArea.BusinessAreaID FROM conf.FactTable FactTable
+CROSS APPLY STRING_SPLIT(BusinessAreas, ',')
+INNER JOIN conf.BusinessArea businessArea ON businessarea.BusinessAreaName = TRIM(value)
+WHERE TableName = @TableName AND SchemaName = @SchemaName
 
 SET @LogMessage = 'Rebuilding fact table ' + @SchemaName + '.F_' + @TableName + ' has finished'
 

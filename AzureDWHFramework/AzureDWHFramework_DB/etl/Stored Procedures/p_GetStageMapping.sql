@@ -19,8 +19,9 @@ SELECT @cmd = N'
 	,ClearTargetTableQuery
 	,TargetSchema
 	,TargetTable
-	,DataLakeDirectory
-	,DataLakeFile
+	,CustomParameter1
+	,CustomParameter2
+	,CustomParameter3
 	FROM [etl].[v_StageMapping]
   WHERE 
   [Area] IN (''' + REPLACE(REPLACE(@Area, ' ',''), ',', ''',''') + ''')

@@ -113,7 +113,6 @@
     <Build Include="conf\Stored Procedures\p_GetDescriptions.sql" />
     <Build Include="etl\Tables\StageMapping.sql" />
     <Build Include="etl\Tables\DwhMapping.sql" />
-    <Build Include="etl\Views\v_ETLStageMapping.sql" />
     <Build Include="etl\Views\v_DwhMapping.sql" />
     <Build Include="etl\Stored Procedures\p_GetStageMapping.sql" />
     <Build Include="etl\Stored Procedures\p_ClearStageTables.sql" />
@@ -123,6 +122,8 @@
     <Build Include="conf\Tables\StageTable_BusinessArea.sql" />
     <Build Include="conf\Tables\FactTable_BusinessArea.sql" />
     <Build Include="conf\Tables\DimensionTable_BusinessArea.sql" />
+    <Build Include="etl\Views\v_StageMapping.sql" />
+    <Build Include="conf\Stored Procedures\p_GetDataObjectsDocumentationData.sql" />
   </ItemGroup>
   <ItemGroup>
     <ArtifactReference Include="C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\IDE\Extensions\Microsoft\SQLDB\Extensions\SqlServer\AzureV12\SqlSchemas\master.dacpac">

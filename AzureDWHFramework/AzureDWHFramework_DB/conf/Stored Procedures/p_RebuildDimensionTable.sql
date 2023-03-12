@@ -32,14 +32,24 @@ SET @sql =
    ) 
 	FROM conf.DimensionTableColumn WHERE DimensionTableID = @DimensionTableID
  ) +
-',[InsertedID] BIGINT NOT NULL FOREIGN KEY REFERENCES log.ETLLog(ETLLogID)' +
-',[UpdatedID] BIGINT NOT NULL FOREIGN KEY REFERENCES log.ETLLog(ETLLogID)' +
+',[InsertedETLLogID] BIGINT NOT NULL FOREIGN KEY REFERENCES log.ETLLog(ETLLogID)' +
+',[UpdatedETLLogID] BIGINT NOT NULL FOREIGN KEY REFERENCES log.ETLLog(ETLLogID)' +
 ',[Active] BIT NOT NULL ' +
 ')'
 
 
 --print (@sql)
 EXEC sp_executesql @sql
+
+INSERT INTO conf.DimensionTable_BusinessArea
+(
+DimensionTableID, 
+BusinessAreaID
+)
+SELECT DimensionTable.DimensionTableID, businessArea.BusinessAreaID FROM conf.DimensionTable DimensionTable
+CROSS APPLY STRING_SPLIT(BusinessAreas, ',')
+INNER JOIN conf.BusinessArea businessArea ON businessarea.BusinessAreaName = TRIM(value)
+WHERE TableName = @TableName AND SchemaName = @SchemaName
 
 SET @LogMessage = 'Rebuilding dimension table ' + @SchemaName + '.D_' + @TableName + ' has finished'
 

@@ -34,9 +34,18 @@ SET @sql =
 ',[UpdatedETLLogID] BIGINT NOT NULL FOREIGN KEY REFERENCES log.ETLLog(ETLLogID)' +
 ')'
 
-
 --print (@sql)
 EXEC sp_executesql @sql
+
+INSERT INTO conf.StageTable_BusinessArea
+(
+StageTableID, 
+BusinessAreaID
+)
+SELECT stageTable.StageTableID, businessArea.BusinessAreaID FROM conf.StageTable stageTable
+CROSS APPLY STRING_SPLIT(BusinessAreas, ',')
+INNER JOIN conf.BusinessArea businessArea ON businessarea.BusinessAreaName = TRIM(value)
+WHERE TableName = @TableName AND SchemaName = @SchemaName
 
 SET @LogMessage = 'Rebuilding stage table ' + @SchemaName + '.' + @TableName + ' has finished'
 
