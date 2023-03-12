@@ -3,18 +3,6 @@
 @TableName NVARCHAR(255)
 AS
 
-SELECT
-ColumnName,
-DataType,
-CASE 
-	WHEN DataType LIKE '%CHAR%' THEN 'STRING'
-	WHEN DataType LIKE '%DATE%' THEN 'DATETIME'
-	WHEN DataType IN ('SMALLINT','INT','BIGINT') THEN 'INT64'
-	WHEN DataType = 'BIT' THEN 'BOOLEAN'
-	WHEN DataType IN ('Money','Float','Double') OR DataType LIKE '%Decimal%' THEN 'DOUBLE'
-	ELSE 'STRING' END TabularDataType
-FROM
-(
 SELECT 
 ColumnName,
 DataType
@@ -44,4 +32,3 @@ INNER JOIN conf.FactTable_TabularModel factTab on facttable.FactTableID = factta
 INNER JOIN conf.TabularModel tabModel ON tabModel.TabularModelID = factTab.TabularModelID
 INNER JOIN conf.FactTableColumn factTableCol ON factTableCol.FactTableID = factTable.FactTableID
 WHERE TabularModelName = @TabularModel AND TableName = @TableName
-)t

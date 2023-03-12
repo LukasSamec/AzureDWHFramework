@@ -119,6 +119,10 @@
     <Build Include="etl\Stored Procedures\p_ClearStageTables.sql" />
     <Build Include="etl\Stored Procedures\p_GetDwhLayers.sql" />
     <Build Include="Security\etl.sql" />
+    <Build Include="conf\Tables\TabularModel_BusinessArea.sql" />
+    <Build Include="conf\Tables\StageTable_BusinessArea.sql" />
+    <Build Include="conf\Tables\FactTable_BusinessArea.sql" />
+    <Build Include="conf\Tables\DimensionTable_BusinessArea.sql" />
   </ItemGroup>
   <ItemGroup>
     <ArtifactReference Include="C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\IDE\Extensions\Microsoft\SQLDB\Extensions\SqlServer\AzureV12\SqlSchemas\master.dacpac">

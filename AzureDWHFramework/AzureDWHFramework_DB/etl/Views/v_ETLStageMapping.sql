@@ -17,7 +17,9 @@ CREATE VIEW [etl].[v_ETLStageMapping]
 	)
 	,ETLMapping AS (
 		SELECT
-		SourceSchema
+		SourceType
+		,SourceName
+		,SourceSchema
 		,SourceTable
 		,N'SELECT ' + cl.ColumnList + ' FROM ' + QUOTENAME(SourceSchema,'[]') + '.' + QUOTENAME(SourceTable,'[]') + ' ' + CASE WHEN IncrementCondition IS NOT NULL THEN ' WHERE ' + IncrementCondition ELSE '' END SelectQuery
 		,CASE 
@@ -36,7 +38,9 @@ CREATE VIEW [etl].[v_ETLStageMapping]
 		INNER JOIN ColumnList cl ON sm.TargetTable = cl.TableName AND sm.TargetSchema = cl.SchemaName
 	)
 	SELECT
-	SourceSchema
+	SourceType
+	,SourceName
+	,SourceSchema
 	,SourceTable
 	,SelectQuery
 	,ClearTargetTableQuery

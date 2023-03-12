@@ -4,10 +4,13 @@
     [TableName]        NVARCHAR (255)  NOT NULL,
     [LoadType]         NVARCHAR (255)  NOT NULL,
     [Description]      NVARCHAR (4000) NULL,
+    [BusinessAreas]    NVARCHAR (255)  NOT NULL,
     PRIMARY KEY CLUSTERED ([DimensionTableID] ASC),
     CHECK ([LoadType]='SCD2' OR [LoadType]='SCD1'),
     CONSTRAINT [UQ_DimensionSchemaAndTableName] UNIQUE NONCLUSTERED ([SchemaName] ASC, [TableName] ASC)
 );
+
+
 
 
 
