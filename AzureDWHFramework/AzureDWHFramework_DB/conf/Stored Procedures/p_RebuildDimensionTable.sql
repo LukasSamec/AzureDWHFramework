@@ -35,8 +35,8 @@ SET @sql =
    ) 
 	FROM conf.DimensionTableColumn WHERE DimensionTableID = @DimensionTableID
  ) 
- + CASE WHEN @LoadType = 'SCD2' THEN ',[RowValidDateFrom] DATETIME2 NULL' END +
- + CASE WHEN @LoadType = 'SCD2' THEN ',[RowValidDateTo] DATETIME2 NULL' END +
+ + CASE WHEN @LoadType = 'SCD2' THEN ',[RowValidDateFrom] DATETIME2 NULL' ELSE '' END +
+ + CASE WHEN @LoadType = 'SCD2' THEN ',[RowValidDateTo] DATETIME2 NULL' ELSE '' END +
 ',[InsertedETLLogID] BIGINT NOT NULL FOREIGN KEY REFERENCES log.ETLLog(ETLLogID)' +
 ',[UpdatedETLLogID] BIGINT NOT NULL FOREIGN KEY REFERENCES log.ETLLog(ETLLogID)' +
 ',[Active] BIT NOT NULL ' +

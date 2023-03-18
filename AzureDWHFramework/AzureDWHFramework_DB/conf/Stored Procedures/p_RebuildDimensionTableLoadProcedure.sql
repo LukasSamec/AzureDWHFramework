@@ -72,8 +72,8 @@ SET @sql =
    ) 
 	FROM conf.DimensionTableColumn WHERE DimensionTableID = @DimensionTableID
  ) 
- + CASE WHEN @LoadType = 'SCD2' THEN ',[RowValidDateFrom] DATETIME2 NULL' END +
- + CASE WHEN @LoadType = 'SCD2' THEN ',[RowValidDateTo] DATETIME2 NULL' END +
+ + CASE WHEN @LoadType = 'SCD2' THEN ',[RowValidDateFrom] DATETIME2 NULL' ELSE '' END +
+ + CASE WHEN @LoadType = 'SCD2' THEN ',[RowValidDateTo] DATETIME2 NULL' ELSE '' END +
 ',[InsertedETLLogID] BIGINT NOT NULL' +
 ',[UpdatedETLLogID] BIGINT NOT NULL' +
 ',[Active] BIT NOT NULL ' +
@@ -96,8 +96,8 @@ SET @sql =
 	  INNER JOIN conf.StageTable stageTable ON stageTable.StageTableID = stageTableColumn.StageTableID
 	  WHERE dimTable.DimensionTableID = @DimensionTableID
 ) + ',' + CHAR(13) +
-	+ CASE WHEN @LoadType = 'SCD2' THEN '[RowValidDateFrom],' END +
-	+ CASE WHEN @LoadType = 'SCD2' THEN '[RowValidDateTO],' END +
+	+ CASE WHEN @LoadType = 'SCD2' THEN '[RowValidDateFrom],' ELSE '' END +
+	+ CASE WHEN @LoadType = 'SCD2' THEN '[RowValidDateTO],' ELSE '' END +
   'InsertedETLLogID,' + CHAR(13) +
   'UpdatedETLLogID,' + CHAR(13) +
   'Active' + CHAR(13) +
@@ -115,8 +115,8 @@ SET @sql =
 	  INNER JOIN conf.StageTable stageTable ON stageTable.StageTableID = stageTableColumn.StageTableID
 	  WHERE dimTable.DimensionTableID = @DimensionTableID
   )  +','+ CHAR(13)  +
-  	+ CASE WHEN @LoadType = 'SCD2' THEN 'GETUTCDATE(),' END +
-	+ CASE WHEN @LoadType = 'SCD2' THEN 'NULL,' END +
+  	+ CASE WHEN @LoadType = 'SCD2' THEN 'GETUTCDATE(),' ELSE '' END +
+	+ CASE WHEN @LoadType = 'SCD2' THEN 'NULL,' ELSE '' END +
   +'@ETLLogID,'+ CHAR(13)  +
   +'@ETLLogID,'+ CHAR(13)  +
   +'1'+ CHAR(13)  +
@@ -126,9 +126,9 @@ SET @sql =
 'SET IDENTITY_INSERT '+ @SchemaName + '.D_' + @TableName +' OFF;' + CHAR(13) +
 'END'+ CHAR(13)
 
+
 IF @LoadType = 'SCD1'
 BEGIN
-
 SET @sql = @sql +
 	'MERGE ' +  @SchemaName + '.D_' + @TableName + ' AS target' + CHAR(13) +
 	'USING' + CHAR(13) +
@@ -228,7 +228,7 @@ SET @sql = @sql +
 	 (
 		 SELECT 
 		  DISTINCT
-		  CONCAT('ON (target.' , dimTableColumn.ColumnName, ' = source.', stageTableColumn.ColumnName, ')')
+		  CONCAT('ON (target.' , dimTableColumn.ColumnName, ' = source.', stageTableColumn.ColumnName, ' AND target.Active = 1)')
 		  FROM
 		  conf.DimensionTable dimTable
 		  INNER JOIN conf.DimensionTableColumn dimTableColumn ON dimTable.DimensionTableID = dimTableColumn.DimensionTableID
@@ -288,6 +288,7 @@ SET @sql = @sql +
 	  )  +','+ CHAR(13)  +
 	  'GETDATE(), NULL, @ETLLogID, @ETLLogID, 1' + ' INTO #' + 'D_' + @TableName + ';' + CHAR(13) +
 
+	   'select * FROM #' + 'D_' + @TableName + ' WHERE Change = ''UPDATE''' + CHAR(13)+ 
 	   'INSERT INTO ' +  @SchemaName + '.D_' + @TableName + CHAR(13) +
 	  '(' + CHAR(13) +
 	  (
