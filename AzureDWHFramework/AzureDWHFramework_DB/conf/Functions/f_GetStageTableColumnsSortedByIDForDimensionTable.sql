@@ -9,7 +9,7 @@ RETURN
 	  stageTableColumn.ColumnName ColumnName
 	  FROM
 	  conf.DimensionTable dimTable
-	  INNER JOIN conf.DimensionTableColumn dimTableColumn ON dimTable.DimensionTableID = dimTable.DimensionTableID
+	  INNER JOIN conf.DimensionTableColumn dimTableColumn ON dimTable.DimensionTableID = dimTableColumn.DimensionTableID
 	  INNER JOIN conf.StageTableColumn stageTableColumn ON stageTableColumn.StageTableColumnID = dimTableColumn.StageTableColumnID
 	  INNER JOIN conf.StageTable stageTable ON stageTable.StageTableID = stageTableColumn.StageTableID
 	  WHERE dimTable.DimensionTableID = @DimensionTableID

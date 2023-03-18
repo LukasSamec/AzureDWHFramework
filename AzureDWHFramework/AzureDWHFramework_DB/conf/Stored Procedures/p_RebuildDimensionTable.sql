@@ -7,10 +7,13 @@ AS
 DECLARE @sql AS NVARCHAR(MAX)
 DECLARE @ProcedureName AS NVARCHAR(100) = OBJECT_NAME(@@PROCID)
 DECLARE @LogMessage AS NVARCHAR(MAX)
+DECLARE @LoadType AS NVARCHAR(50)
 
 BEGIN TRY
 
 SET @LogMessage = 'Rebuilding dimension table ' + @SchemaName + '.D_' + @TableName + ' has started'
+
+SET @LoadType = (SELECT LoadType from conf.DimensionTable WHERE TableName = @TableName AND SchemaName = @SchemaName)
 
 EXEC log.p_WriteFrameworkLog @ProcedureName, 'Info', @LogMessage
 
@@ -31,7 +34,9 @@ SET @sql =
 		) , ', '
    ) 
 	FROM conf.DimensionTableColumn WHERE DimensionTableID = @DimensionTableID
- ) +
+ ) 
+ + CASE WHEN @LoadType = 'SCD2' THEN ',[RowValidDateFrom] DATETIME2 NULL' END +
+ + CASE WHEN @LoadType = 'SCD2' THEN ',[RowValidDateTo] DATETIME2 NULL' END +
 ',[InsertedETLLogID] BIGINT NOT NULL FOREIGN KEY REFERENCES log.ETLLog(ETLLogID)' +
 ',[UpdatedETLLogID] BIGINT NOT NULL FOREIGN KEY REFERENCES log.ETLLog(ETLLogID)' +
 ',[Active] BIT NOT NULL ' +
