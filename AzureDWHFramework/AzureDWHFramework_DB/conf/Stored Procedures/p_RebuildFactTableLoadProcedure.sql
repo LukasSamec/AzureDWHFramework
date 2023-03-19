@@ -1,6 +1,6 @@
 ﻿
 CREATE PROCEDURE [conf].[p_RebuildFactTableLoadProcedure]
-@DimensionTableID INT,
+@FactTableID INT,
 @SchemaName NVARCHAR(100),
 @TableName  NVARCHAR(100)
 AS
@@ -36,13 +36,13 @@ SET @LogMessage = 'Rebuilding load procedure ' + @SchemaName + '.p_load_F_' + @T
 
 EXEC log.p_WriteFrameworkLog @ProcedureName, 'Info', @LogMessage
 
-SET @sql = 'IF OBJECT_ID(''' + @SchemaName + '.p_load_F_' + @TableName + ''', N''P'') IS NOT NULL ' + 'DROP PROCEDURE ' + @SchemaName + '.p_load_F_' + @TableName
+SET @sql = 'IF OBJECT_ID(''' + @SchemaName + '.p_Load_F_' + @TableName + ''', N''P'') IS NOT NULL ' + 'DROP PROCEDURE ' + @SchemaName + '.p_load_F_' + @TableName
 
 --print (@sql)
 EXEC sp_executesql @sql
 
 SET @sql = 
-'CREATE PROCEDURE ' + @SchemaName + '.p_load_F_' + @TableName + CHAR(13) +
+'CREATE PROCEDURE ' + @SchemaName + '.p_Load_F_' + @TableName + CHAR(13) +
 '@ETLLogID BIGINT ' + CHAR(13) +
 'AS' + CHAR(13) +
 'DECLARE @ETLTableLoadLogID BIGINT' + CHAR(13) +
@@ -63,29 +63,31 @@ SET @sql =
  '(' + CHAR(13) +
   (
 	  SELECT 
-	  STRING_AGG(dimTableColumn.ColumnName, ',' + CHAR(13))
+	  STRING_AGG(factTableColumn.ColumnName, ',' + CHAR(13))
 	  FROM
-	  conf.FactTable dimTable
-	  INNER JOIN conf.FactTableColumn dimTableColumn ON dimTable.FactTableID = dimTableColumn.FactTableID
-	  INNER JOIN conf.StageTableColumn stageTableColumn ON stageTableColumn.StageTableColumnID = dimTableColumn.StageTableColumnID
+	  conf.FactTable factTable
+	  INNER JOIN conf.FactTableColumn factTableColumn ON factTable.FactTableID = factTableColumn.FactTableID
+	  INNER JOIN conf.StageTableColumn stageTableColumn ON stageTableColumn.StageTableColumnID = factTableColumn.StageTableColumnID
 	  INNER JOIN conf.StageTable stageTable ON stageTable.StageTableID = stageTableColumn.StageTableID
-	  WHERE dimTable.FactTableID = @DimensionTableID
+	  WHERE factTable.FactTableID = @FactTableID
   ) + ',' + CHAR(13) +
-  'InsertedID,' + CHAR(13) +
-  'UpdatedID,' + CHAR(13) +
+  'InsertedETLLogID,' + CHAR(13) +
+  'UpdatedETLLogID,' + CHAR(13) +
   'Active' + CHAR(13) +
   ')' + CHAR(13) +
  'SELECT' + CHAR(13) +
  (
 	  SELECT 
 	  DISTINCT
-	  STRING_AGG(COALESCE(dimTable.TableName + 'ID', stageTableColumn.ColumnName), ',' + CHAR(13))
+	  STRING_AGG(CASE WHEN dimTable.DimensionTableID IS NOT NULL THEN CONCAT ('ISNULL('+ dimTable.SchemaName, dimTable.TableName,stageTableColumn.ColumnName +'.' + dimTable.TableName + 'ID, -1)') ELSE stageTableColumn.ColumnName END, ',' + CHAR(13))
+	  --STRING_AGG(COALESCE('ISNULL('+ dimTable.SchemaName, dimTable.TableName,stageTableColumn.ColumnName +'.' + dimTable.TableName + 'ID, -1)' , stageTableColumn.ColumnName), ',' + CHAR(13))
 	  FROM
 	  conf.FactTable factTable
 	  LEFT JOIN conf.FactTableColumn factTableColumn ON factTable.FactTableID = factTableColumn.FactTableID
 	  LEFT JOIN conf.StageTableColumn stageTableColumn ON stageTableColumn.StageTableColumnID = factTableColumn.StageTableColumnID
 	  LEFT JOIN conf.StageTable stageTable ON stageTable.StageTableID = stageTableColumn.StageTableID
 	  LEFT JOIN conf.DimensionTable dimTable ON dimTable.DimensionTableID = factTableColumn.DimensionTableID
+	  WHERE factTable.FactTableID = @FactTableID
  ) + ',' + CHAR(13) +
   '@ETLLogID,' + CHAR(13) +
   '@ETLLogID,' + CHAR(13) +
@@ -94,13 +96,15 @@ SET @sql =
   (
 	  SELECT 
 	  DISTINCT
-	  STRING_AGG(CONCAT('LEFT JOIN ', dimTable.SchemaName, '.D_', dimTable.TableName, ' ', dimTable.SchemaName, dimTable.TableName,  ' ON ', dimTable.SchemaName, dimTable.TableName, '.',dimTable.TableName, 'Code = ', stageTable.SchemaName, stageTable.TableName,  '.', stageTableColumn.ColumnName), CHAR(13))
+	  STRING_AGG(CONCAT('LEFT JOIN ', dimTable.SchemaName, '.D_', dimTable.TableName, ' ', dimTable.SchemaName, dimTable.TableName,stageTableColumn.ColumnName,  ' ON ', dimTable.SchemaName, dimTable.TableName,stageTableColumn.ColumnName, '.',dimTableColumn.ColumnName, ' = ', stageTable.SchemaName, stageTable.TableName,  '.', stageTableColumn.ColumnName), CHAR(13))
 	  FROM
 	  conf.FactTable factTable
 	  INNER JOIN conf.FactTableColumn factTableColumn ON factTable.FactTableID = factTableColumn.FactTableID
 	  INNER JOIN conf.StageTableColumn stageTableColumn ON stageTableColumn.StageTableColumnID = factTableColumn.StageTableColumnID
 	  INNER JOIN conf.StageTable stageTable ON stageTable.StageTableID = stageTableColumn.StageTableID
 	  INNER JOIN conf.DimensionTable dimTable ON dimTable.DimensionTableID = factTableColumn.DimensionTableID
+	  INNER JOIN conf.DimensionTableColumn dimTableColumn ON dimTableColumn.DimensionTableID = dimTable.DimensionTableID AND dimTableColumn.BusinessKey = 1
+	  WHERE factTable.FactTableID = @FactTableID
   )  + CHAR(13) +
 
 
@@ -118,13 +122,13 @@ SET @sql =
   'BEGIN CATCH' + CHAR(13) +
   'SELECT @DateTime = GETUTCDATE()'  + CHAR(13)  +
   'SELECT @ErrorMessage = ERROR_MESSAGE()' + CHAR(13)  +
-  'EXEC log.p_UpdateETLTableLoadLog @ETLTableLoadLogID, 3, ''Failed'', @DateTime, @InsertedCount, @UpdatedCount, @DeletedCount, @ErrorMessage' + CHAR(13)  +
+  'EXEC log.p_UpdateETLTableLoadLog @ETLTableLoadLogID, 3, ''Failed'', @InsertedCount, @UpdatedCount, @DeletedCount, @ErrorMessage' + CHAR(13)  +
   'EXEC log.p_UpdateETLLog @ETLLogID, 3, ''Failed''' + CHAR(13)  +
   ';THROW' + CHAR(13)  +
   'END CATCH'
 
-print (@sql)
---EXEC sp_executesql @sql
+--print (@sql)
+EXEC sp_executesql @sql
 
 SET @LogMessage = 'Rebuilding load procedure ' + @SchemaName + '.p_load_F_' + @TableName + ' has finished'
 
