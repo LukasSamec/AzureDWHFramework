@@ -14,7 +14,7 @@ DECLARE @StageTableSchema AS NVARCHAR(255) = (
   stageTable.SchemaName
   FROM
   conf.FactTable factTable
-  INNER JOIN conf.FactTableColumn factTableColumn ON factTableColumn.FactTableID = factTable.FactTableID
+  INNER JOIN conf.FactTableColumn factTableColumn ON factTableColumn.FactTableID = factTableColumn.FactTableID
   INNER JOIN conf.StageTableColumn stageTableColumn ON stageTableColumn.StageTableColumnID = factTableColumn.StageTableColumnID
   INNER JOIN conf.StageTable stageTable ON stageTable.StageTableID = stageTableColumn.StageTableID
 )
@@ -25,7 +25,7 @@ DECLARE @StageTableName AS NVARCHAR(255) = (
   stageTable.TableName
   FROM
   conf.FactTable factTable
-  INNER JOIN conf.FactTableColumn factTableColumn ON factTableColumn.FactTableID = factTable.FactTableID
+  INNER JOIN conf.FactTableColumn factTableColumn ON factTableColumn.FactTableID = factTableColumn.FactTableID
   INNER JOIN conf.StageTableColumn stageTableColumn ON stageTableColumn.StageTableColumnID = factTableColumn.StageTableColumnID
   INNER JOIN conf.StageTable stageTable ON stageTable.StageTableID = stageTableColumn.StageTableID
 )
@@ -66,7 +66,7 @@ SET @sql =
 	  STRING_AGG(dimTableColumn.ColumnName, ',' + CHAR(13))
 	  FROM
 	  conf.FactTable dimTable
-	  INNER JOIN conf.FactTableColumn dimTableColumn ON dimTable.FactTableID = dimTable.FactTableID
+	  INNER JOIN conf.FactTableColumn dimTableColumn ON dimTable.FactTableID = dimTableColumn.FactTableID
 	  INNER JOIN conf.StageTableColumn stageTableColumn ON stageTableColumn.StageTableColumnID = dimTableColumn.StageTableColumnID
 	  INNER JOIN conf.StageTable stageTable ON stageTable.StageTableID = stageTableColumn.StageTableID
 	  WHERE dimTable.FactTableID = @DimensionTableID
@@ -82,7 +82,7 @@ SET @sql =
 	  STRING_AGG(COALESCE(dimTable.TableName + 'ID', stageTableColumn.ColumnName), ',' + CHAR(13))
 	  FROM
 	  conf.FactTable factTable
-	  LEFT JOIN conf.FactTableColumn factTableColumn ON factTable.FactTableID = factTable.FactTableID
+	  LEFT JOIN conf.FactTableColumn factTableColumn ON factTable.FactTableID = factTableColumn.FactTableID
 	  LEFT JOIN conf.StageTableColumn stageTableColumn ON stageTableColumn.StageTableColumnID = factTableColumn.StageTableColumnID
 	  LEFT JOIN conf.StageTable stageTable ON stageTable.StageTableID = stageTableColumn.StageTableID
 	  LEFT JOIN conf.DimensionTable dimTable ON dimTable.DimensionTableID = factTableColumn.DimensionTableID
@@ -97,7 +97,7 @@ SET @sql =
 	  STRING_AGG(CONCAT('LEFT JOIN ', dimTable.SchemaName, '.D_', dimTable.TableName, ' ', dimTable.SchemaName, dimTable.TableName,  ' ON ', dimTable.SchemaName, dimTable.TableName, '.',dimTable.TableName, 'Code = ', stageTable.SchemaName, stageTable.TableName,  '.', stageTableColumn.ColumnName), CHAR(13))
 	  FROM
 	  conf.FactTable factTable
-	  INNER JOIN conf.FactTableColumn factTableColumn ON factTable.FactTableID = factTable.FactTableID
+	  INNER JOIN conf.FactTableColumn factTableColumn ON factTable.FactTableID = factTableColumn.FactTableID
 	  INNER JOIN conf.StageTableColumn stageTableColumn ON stageTableColumn.StageTableColumnID = factTableColumn.StageTableColumnID
 	  INNER JOIN conf.StageTable stageTable ON stageTable.StageTableID = stageTableColumn.StageTableID
 	  INNER JOIN conf.DimensionTable dimTable ON dimTable.DimensionTableID = factTableColumn.DimensionTableID
