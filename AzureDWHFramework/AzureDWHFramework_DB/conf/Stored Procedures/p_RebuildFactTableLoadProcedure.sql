@@ -17,6 +17,7 @@ DECLARE @StageTableSchema AS NVARCHAR(255) = (
   INNER JOIN conf.FactTableColumn factTableColumn ON factTableColumn.FactTableID = factTableColumn.FactTableID
   INNER JOIN conf.StageTableColumn stageTableColumn ON stageTableColumn.StageTableColumnID = factTableColumn.StageTableColumnID
   INNER JOIN conf.StageTable stageTable ON stageTable.StageTableID = stageTableColumn.StageTableID
+  WHERE factTable.FactTableID = @FactTableID
 )
 
 DECLARE @StageTableName AS NVARCHAR(255) = (
@@ -28,6 +29,25 @@ DECLARE @StageTableName AS NVARCHAR(255) = (
   INNER JOIN conf.FactTableColumn factTableColumn ON factTableColumn.FactTableID = factTableColumn.FactTableID
   INNER JOIN conf.StageTableColumn stageTableColumn ON stageTableColumn.StageTableColumnID = factTableColumn.StageTableColumnID
   INNER JOIN conf.StageTable stageTable ON stageTable.StageTableID = stageTableColumn.StageTableID
+  WHERE factTable.FactTableID = @FactTableID
+)
+
+DECLARE @DeleteCondition AS NVARCHAR(255) = (
+  SELECT 
+  DISTINCT
+  DeleteCondition
+  FROM
+  conf.FactTable factTable
+  WHERE factTable.FactTableID = @FactTableID AND LoadWithIncrement = 1
+)
+
+DECLARE @IncrementCondition AS NVARCHAR(255) = (
+  SELECT 
+  DISTINCT
+  IncrementCondition
+  FROM
+  conf.FactTable factTable
+  WHERE factTable.FactTableID = @FactTableID AND LoadWithIncrement = 1
 )
 
 BEGIN TRY
@@ -55,10 +75,19 @@ SET @sql =
 'BEGIN TRY' + CHAR(13) +
 'EXEC log.p_WriteETLTableLoadLog @ETLLogID,''' +  @SchemaName + '.p_load_F_' + @TableName + ''', ''' + @SchemaName + ' '', ''F_' + @TableName + ''',''Stored procedure'', 1, ''Running'', @ETLTableLoadLogID OUTPUT' + CHAR(13) +
 
-'INSERT INTO @SummaryOfChanges (Change, Code) VALUES (''DELETE'', (SELECT COUNT(*) FROM '+ @SchemaName + '.F_' + @TableName +'))' + CHAR(13) +
+'INSERT INTO @SummaryOfChanges (Change, Code) VALUES (''DELETE'', (SELECT COUNT(*) FROM '+ @SchemaName + '.F_' + @TableName +'))' + CHAR(13)
 
-'TRUNCATE TABLE '+ @SchemaName + '.F_' + @TableName + CHAR(13) +
+IF @DeleteCondition IS NULL
+BEGIN
+SET @sql = @sql + 'TRUNCATE TABLE '+ @SchemaName + '.F_' + @TableName + CHAR(13)
+END
 
+IF @DeleteCondition IS NOT NULL
+BEGIN
+SET @sql = @sql + 'DELETE FROM '+ @SchemaName + '.F_' + @TableName + 'WHERE ' + @DeleteCondition + CHAR(13)
+END
+
+SET @sql = @sql +
 'INSERT INTO '+ @SchemaName + '.F_' + @TableName + CHAR(13) +
  '(' + CHAR(13) +
   (
@@ -105,9 +134,15 @@ SET @sql =
 	  INNER JOIN conf.DimensionTable dimTable ON dimTable.DimensionTableID = factTableColumn.DimensionTableID
 	  INNER JOIN conf.DimensionTableColumn dimTableColumn ON dimTableColumn.DimensionTableID = dimTable.DimensionTableID AND dimTableColumn.BusinessKey = 1
 	  WHERE factTable.FactTableID = @FactTableID
-  )  + CHAR(13) +
+  )  + CHAR(13)
+
+  IF @DeleteCondition IS NOT NULL
+	BEGIN
+	SET @sql = @sql +'WHERE ' + @IncrementCondition + CHAR(13)
+	END
 
 
+  SET @sql = @sql +
   'INSERT INTO @SummaryOfChanges (Change, Code) VALUES (''INSERT'', (SELECT COUNT(*) FROM '+ @SchemaName + '.F_' + @TableName +'))' + CHAR(13) +
 
 
