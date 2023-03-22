@@ -10,3 +10,27 @@
 
 
 
+
+
+
+GO
+
+
+
+CREATE TRIGGER conf.AssingTabularModelToBusinessArea
+ON [conf].[TabularModel]
+AFTER INSERT
+AS
+BEGIN
+
+INSERT INTO conf.TabularModel_BusinessArea
+(
+TabularModelID, 
+BusinessAreaID
+)
+SELECT TabularModelID, businessArea.BusinessAreaID FROM inserted
+CROSS APPLY STRING_SPLIT(BusinessAreas, ',')
+INNER JOIN conf.BusinessArea businessArea ON businessarea.BusinessAreaName = TRIM(value)
+
+
+END
