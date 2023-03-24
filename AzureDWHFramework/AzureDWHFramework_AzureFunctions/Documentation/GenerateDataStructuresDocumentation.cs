@@ -58,7 +58,7 @@ namespace AzureDWHFramework_AzureFunctions.Documentation
                     sb.AppendLine(string.Join(",", fields));
                 }
 
-                File.WriteAllText("Documentation.csv", sb.ToString());
+                File.WriteAllText("Documentation.csv", sb.ToString(), Encoding.UTF8);
 
                 StorageSharedKeyCredential sharedKeyCredential =new StorageSharedKeyCredential(adlsAccountName, adlsAccountKey);
 
