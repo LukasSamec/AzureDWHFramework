@@ -173,7 +173,7 @@ namespace AzureDWHFramework_TabularModelGenerator
                 string mainRelationship = relationship["MainRelationship"].ToString();
 
                 bool mainRelationshipBool = false;
-                if (mainRelationship.Equals("1"))
+                if (mainRelationship.Equals("True"))
                 {
                     mainRelationshipBool = true;
                 }
