@@ -151,7 +151,7 @@ SET @sql = @sql +
   'SELECT @DeletedCount = COUNT(1) FROM @SummaryOfChanges WHERE Change = ''DELETE''' + CHAR(13)  +
   'SELECT @DateTime = GETUTCDATE()'  + CHAR(13)  +
 
-  'EXEC log.p_UpdateETLTableLoadLog @ETLTableLoadLogID, 2, ''Finished'', @DateTime, @InsertedCount, @UpdatedCount, @DeletedCount' + CHAR(13)  +
+   'EXEC log.p_UpdateETLTableLoadLog @ETLTableLoadLogID, 2, ''Finished'', @InsertedCount, @UpdatedCount, @DeletedCount' + CHAR(13)  +
 
   'END TRY' + CHAR(13) +
   'BEGIN CATCH' + CHAR(13) +
