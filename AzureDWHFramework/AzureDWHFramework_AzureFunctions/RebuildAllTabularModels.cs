@@ -13,6 +13,7 @@ using System.Net.Http;
 using System.Data;
 using Microsoft.AnalysisServices;
 
+// http://localhost:7071/api/RebuildAllTabularModels?keyVault=https://azuredwhframework.vault.azure.net
 namespace AzureDWHFramework_TabularModelGenerator
 {
     public static class RebuildAllTabularModels
