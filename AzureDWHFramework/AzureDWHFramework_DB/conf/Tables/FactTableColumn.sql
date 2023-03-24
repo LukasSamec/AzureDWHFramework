@@ -8,12 +8,15 @@
     [StageTableColumnID] INT             NOT NULL,
     [DimensionTableID]   INT             NULL,
     [Description]        NVARCHAR (4000) NULL,
+    [MainRelationship]   BIT             NULL,
     PRIMARY KEY CLUSTERED ([FactTableColumnID] ASC),
     FOREIGN KEY ([DimensionTableID]) REFERENCES [conf].[DimensionTable] ([DimensionTableID]),
     FOREIGN KEY ([FactTableID]) REFERENCES [conf].[FactTable] ([FactTableID]),
     FOREIGN KEY ([StageTableColumnID]) REFERENCES [conf].[StageTableColumn] ([StageTableColumnID]),
     CONSTRAINT [UQ_FactColumnTableNameAndColumnName] UNIQUE NONCLUSTERED ([FactTableID] ASC, [ColumnName] ASC)
 );
+
+
 
 
 

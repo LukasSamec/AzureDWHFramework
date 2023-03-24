@@ -4,7 +4,9 @@
   SELECT 
   factTable.TableName TableN,
   dimTable.TableName TableOne,
-  factTableCol.ColumnName
+  factTableCol.ColumnName ColumnNameN,
+  CONCAT(dimTable.TableName, 'ID') ColumnNameOne,
+  factTableCol.MainRelationship
   FROM 
   conf.FactTable factTable 
   INNER JOIN conf.FactTableColumn  factTableCol ON factTable.FactTableID = factTableCol.FactTableID
