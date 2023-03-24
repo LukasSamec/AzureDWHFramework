@@ -62,6 +62,8 @@ namespace AzureDWHFramework_TabularModelGenerator
                 {
                     Name = databaseName,
                     ID = databaseName,
+                    ModelType = ModelType.Tabular,
+                    StorageEngineUsed = StorageEngineUsed.TabularMetadata,
                     CompatibilityLevel = 1600
                 };
                 // Přiřazení nového modelu k databázi.
@@ -164,15 +166,23 @@ namespace AzureDWHFramework_TabularModelGenerator
 
             foreach (DataRow relationship in relationships.Rows)
             {
-                string columnName = relationship["ColumnName"].ToString();
+                string columnNameN = relationship["ColumnNameN"].ToString();
+                string columnNameOne = relationship["ColumnNameOne"].ToString();
                 string tableNName = relationship["TableN"].ToString();
                 string tableOneName = relationship["TableOne"].ToString();
+                string mainRelationship = relationship["MainRelationship"].ToString();
+
+                bool mainRelationshipBool = false;
+                if (mainRelationship.Equals("1"))
+                {
+                    mainRelationshipBool = true;
+                }
 
                 Table tableN = database.Model.Tables.Find(tableNName);
                 Table tableOne = database.Model.Tables.Find(tableOneName);
 
-                DataColumn tableNColumn = (DataColumn)tableN.Columns.Find(columnName);
-                DataColumn tableOneColumn = (DataColumn)tableOne.Columns.Find(columnName);
+                DataColumn tableNColumn = (DataColumn)tableN.Columns.Find(columnNameN);
+                DataColumn tableOneColumn = (DataColumn)tableOne.Columns.Find(columnNameOne);
 
                 SingleColumnRelationship newRalationship = new SingleColumnRelationship()
                 {
@@ -180,7 +190,8 @@ namespace AzureDWHFramework_TabularModelGenerator
                     ToCardinality = RelationshipEndCardinality.One,
 
                     FromColumn = tableNColumn,
-                    ToColumn = tableOneColumn
+                    ToColumn = tableOneColumn,
+                    IsActive = mainRelationshipBool
                 };
 
                 database.Model.Relationships.Add(newRalationship);
