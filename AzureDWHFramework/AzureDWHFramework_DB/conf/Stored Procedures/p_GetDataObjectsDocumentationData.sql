@@ -1,14 +1,14 @@
-﻿CREATE PROCEDURE conf.p_GetDataObjectsDocumentationData
+﻿CREATE PROCEDURE [conf].[p_GetDataObjectsDocumentationData]
 
 AS
 
 SELECT DISTINCT 
 'Analytical database' AS Type,
-tabModel.TabularModelName,
-'',
-'',
-'',
-'',
+tabModel.TabularModelName Name,
+'' TableName,
+'' SourceTableName,
+'' SourceTableColumnName,
+'' ReferencedDimensionTable,
 tabModel.Description
 FROM
 conf.TabularModel tabModel 
@@ -30,8 +30,8 @@ UNION ALL
 
 SELECT DISTINCT
 'Stage Table Column' AS Type,
-CONCAT(stageTable.SchemaName,'.',stageTable.TableName),
 stageTableColumn.ColumnName,
+CONCAT(stageTable.SchemaName,'.',stageTable.TableName),
 '',
 '',
 '',
@@ -59,8 +59,8 @@ UNION ALL
 
 SELECT DISTINCT
 'Dimension Table Column' AS Type,
+dimTableColumn.ColumnName,
 CONCAT(dimTable.SchemaName,'.',dimTable.TableName),
-dimTableCOlumn.ColumnName,
 CONCAT(stageTable.SchemaName,'.',stageTable.TableName),
 stagetableColumn.ColumnName,
 '',
@@ -92,11 +92,11 @@ UNION ALL
 
 SELECT DISTINCT
 'Fact Table Column' AS Type,
-CONCAT(factTable.SchemaName,'.',factTable.TableName),
 factTableColumn.ColumnName,
+CONCAT(factTable.SchemaName,'.',factTable.TableName),
 CONCAT(stageTable.SchemaName,'.',stageTable.TableName),
 stagetableColumn.ColumnName,
-CONCAT(dimTable.SchemaName,'.',dimTable.TableName),
+CASE WHEN dimTable.SchemaName IS NULL THEN '' ELSE CONCAT(dimTable.SchemaName,'.',dimTable.TableName) END,
 factTableColumn.Description
 FROM
 conf.TabularModel tabModel 

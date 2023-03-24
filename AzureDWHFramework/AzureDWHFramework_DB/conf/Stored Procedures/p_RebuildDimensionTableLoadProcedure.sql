@@ -17,6 +17,7 @@ DECLARE @StageTableSchema AS NVARCHAR(255) = (
   INNER JOIN conf.DimensionTableColumn dimTableColumn ON dimTable.DimensionTableID = dimTableColumn.DimensionTableID
   INNER JOIN conf.StageTableColumn stageTableColumn ON stageTableColumn.StageTableColumnID = dimTableColumn.StageTableColumnID
   INNER JOIN conf.StageTable stageTable ON stageTable.StageTableID = stageTableColumn.StageTableID
+  WHERE dimTable.DimensionTableID = @DimensionTableID
 )
 
 DECLARE @StageTableName AS NVARCHAR(255) = (
@@ -39,7 +40,7 @@ SET @LogMessage = 'Rebuilding load procedure ' + @SchemaName + '.p_load_D_' + @T
 
 EXEC log.p_WriteFrameworkLog @ProcedureName, 'Info', @LogMessage
 
-SET @sql = 'IF OBJECT_ID(''' + @SchemaName + '.p_load_D_' + @TableName + ''', N''P'') IS NOT NULL ' + 'DROP PROCEDURE ' + @SchemaName + '.p_load_D_' + @TableName
+SET @sql = 'IF OBJECT_ID(''' + @SchemaName + '.p_Load_D_' + @TableName + ''', N''P'') IS NOT NULL ' + 'DROP PROCEDURE ' + @SchemaName + '.p_load_D_' + @TableName
 
 
 
@@ -48,7 +49,7 @@ SET @sql = 'IF OBJECT_ID(''' + @SchemaName + '.p_load_D_' + @TableName + ''', N'
 EXEC sp_executesql @sql
 
 SET @sql = 
-'CREATE PROCEDURE ' + @SchemaName + '.p_load_D_' + @TableName + CHAR(13) +
+'CREATE PROCEDURE ' + @SchemaName + '.p_Load_D_' + @TableName + CHAR(13) +
 '@ETLLogID BIGINT ' + CHAR(13) +
 'AS' + CHAR(13) +
 'DECLARE @ETLTableLoadLogID BIGINT' + CHAR(13) +

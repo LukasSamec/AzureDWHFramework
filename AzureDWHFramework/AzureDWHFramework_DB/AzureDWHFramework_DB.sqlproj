@@ -110,7 +110,6 @@
     <Build Include="conf\Tables\DimensionTable_TabularModel.sql" />
     <Build Include="conf\Functions\f_GetStageTableColumnsSortedByIDForDimensionTable.sql" />
     <Build Include="conf\Functions\f_GetDimensionTableColumnsSortedByID.sql" />
-    <Build Include="conf\Stored Procedures\p_GetDescriptions.sql" />
     <Build Include="etl\Tables\StageMapping.sql" />
     <Build Include="etl\Tables\DwhMapping.sql" />
     <Build Include="etl\Views\v_DwhMapping.sql" />
