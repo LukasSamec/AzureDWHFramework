@@ -14,7 +14,7 @@ DECLARE @StageTableSchema AS NVARCHAR(255) = (
   stageTable.SchemaName
   FROM
   conf.FactTable factTable
-  INNER JOIN conf.FactTableColumn factTableColumn ON factTableColumn.FactTableID = factTableColumn.FactTableID
+  INNER JOIN conf.FactTableColumn factTableColumn ON factTableColumn.FactTableID = factTable.FactTableID
   INNER JOIN conf.StageTableColumn stageTableColumn ON stageTableColumn.StageTableColumnID = factTableColumn.StageTableColumnID
   INNER JOIN conf.StageTable stageTable ON stageTable.StageTableID = stageTableColumn.StageTableID
   WHERE factTable.FactTableID = @FactTableID
@@ -26,7 +26,7 @@ DECLARE @StageTableName AS NVARCHAR(255) = (
   stageTable.TableName
   FROM
   conf.FactTable factTable
-  INNER JOIN conf.FactTableColumn factTableColumn ON factTableColumn.FactTableID = factTableColumn.FactTableID
+  INNER JOIN conf.FactTableColumn factTableColumn ON factTableColumn.FactTableID = factTable.FactTableID
   INNER JOIN conf.StageTableColumn stageTableColumn ON stageTableColumn.StageTableColumnID = factTableColumn.StageTableColumnID
   INNER JOIN conf.StageTable stageTable ON stageTable.StageTableID = stageTableColumn.StageTableID
   WHERE factTable.FactTableID = @FactTableID

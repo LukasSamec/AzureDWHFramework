@@ -68,6 +68,13 @@
     <Folder Include="etl\Tables\" />
     <Folder Include="etl\Views\" />
     <Folder Include="etl\Stored Procedures\" />
+    <Folder Include="stage_onpremisedb\" />
+    <Folder Include="stage_onpremisedb\Tables\" />
+    <Folder Include="stage_csv\" />
+    <Folder Include="stage_csv\Tables\" />
+    <Folder Include="dwh\" />
+    <Folder Include="dwh\Tables\" />
+    <Folder Include="dwh\Stored Procedures\" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="conf\Stored Procedures\p_RebuildStageTable.sql" />
@@ -128,6 +135,28 @@
     <Build Include="log\Stored Procedures\p_GetLogStatus.sql" />
     <Build Include="etl\Stored Procedures\p_GetTabularModels.sql" />
     <Build Include="etl\Stored Procedures\p_GetDwhMapping.sql" />
+    <Build Include="etl\Stored Procedures\p_GetSuccessfulAreaList.sql" />
+    <Build Include="stage_onpremisedb\Tables\PurchaseOrderHeader.sql" />
+    <Build Include="stage_onpremisedb\Tables\Employee.sql" />
+    <Build Include="stage_onpremisedb\Tables\SalesPerson.sql" />
+    <Build Include="stage_onpremisedb\Tables\SalesOrderHeader.sql" />
+    <Build Include="stage_csv\Tables\Address.sql" />
+    <Build Include="dwh\Tables\F_SalesOrderHeader.sql" />
+    <Build Include="dwh\Tables\D_Date.sql" />
+    <Build Include="dwh\Tables\D_Address.sql" />
+    <Build Include="dwh\Tables\F_PurchaseOrderHeader.sql" />
+    <Build Include="dwh\Tables\D_Employee.sql" />
+    <Build Include="dwh\Tables\D_SalesPerson.sql" />
+    <Build Include="dwh\Stored Procedures\p_Load_D_Date.sql" />
+    <Build Include="dwh\Stored Procedures\p_Load_F_PurchaseOrderHeader.sql" />
+    <Build Include="dwh\Stored Procedures\p_load_D_Employee.sql" />
+    <Build Include="dwh\Stored Procedures\p_load_D_SalesPerson.sql" />
+    <Build Include="dwh\Stored Procedures\p_Load_F_SalesOrderHeader.sql" />
+    <Build Include="dwh\Stored Procedures\p_Load_D_Address.sql" />
+    <Build Include="Security\stage_onpremisedb.sql" />
+    <Build Include="Security\stage_navision.sql" />
+    <Build Include="Security\stage_csv.sql" />
+    <Build Include="Security\dwh.sql" />
   </ItemGroup>
   <ItemGroup>
     <ArtifactReference Include="C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\IDE\Extensions\Microsoft\SQLDB\Extensions\SqlServer\AzureV12\SqlSchemas\master.dacpac">
