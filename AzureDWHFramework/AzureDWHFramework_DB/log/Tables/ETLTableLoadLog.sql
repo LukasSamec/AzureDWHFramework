@@ -17,6 +17,8 @@
     FOREIGN KEY ([ETLLogID]) REFERENCES [log].[ETLLog] ([ETLLogID]),
     CHECK ([Status]=(3) OR [Status]=(2) OR [Status]=(1)),
     CHECK ([StatusDescription]='Failed' OR [StatusDescription]='Finished' OR [StatusDescription]='Running'),
-    CHECK ([Type]='Copy Data' OR [Type]='Stored Procedure')
+    CHECK ([Type]='Copy Data' OR [Type]='Stored Procedure' OR [Type]='Process')
 );
+
+
 
