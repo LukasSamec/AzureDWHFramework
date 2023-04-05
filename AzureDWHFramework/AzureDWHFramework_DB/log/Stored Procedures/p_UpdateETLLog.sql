@@ -3,7 +3,7 @@
 	@Status					INT,
 	@StatusDescription		NVARCHAR(255)
 AS
-	
+	-- Aktualizace řádku log.ETLLog na hodnoty podle vstupních parametrů.
 	UPDATE log.ETLLog
 	SET 
 	EndTime = GETUTCDATE(),

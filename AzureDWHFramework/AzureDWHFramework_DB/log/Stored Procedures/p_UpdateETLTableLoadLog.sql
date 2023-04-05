@@ -7,6 +7,7 @@
 	@Deleted			INT,
 	@ErrorMessage		NVARCHAR(MAX) = NULL
 AS
+-- Aktualizace řádku log.ETLTableLoadLog na hodnoty podle vstupních parametrů.
 	UPDATE log.ETLTableLoadLog
 	SET
 	Status = @Status,

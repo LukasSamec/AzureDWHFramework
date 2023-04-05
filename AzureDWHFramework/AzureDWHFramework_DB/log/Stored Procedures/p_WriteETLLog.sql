@@ -7,9 +7,11 @@
 	@StatusDescription		NVARCHAR(255)
 AS
 	
+	-- Vložení hodnot ze vstupních parametrů do tabulky log.ETLLog.
 	INSERT INTO log.ETLLog(PipelineRunId, PipelineName, PipelineTriggerId, PipelineTriggerTime, Status, StatusDescription)
 	VALUES (@PipelineRunId, @PipelineName, @PipelineTriggerId, @PipelineTriggerTime, @Status , @StatusDescription)
 
+	-- Vrácení nové hodnoty z identity sloupce ETLLogID.
 	SELECT SCOPE_IDENTITY() AS [SCOPE_IDENTITY]
 
 

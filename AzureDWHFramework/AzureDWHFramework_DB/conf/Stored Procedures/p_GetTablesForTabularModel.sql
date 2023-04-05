@@ -2,6 +2,7 @@
 @TabularModel NVARCHAR(255)
 AS
 
+-- Vrácení seznamu dimenzionální tabulek patřících do dané analytické databáze.
 SELECT TableName,
 CONCAT('SELECT * FROM ',SchemaName,'.D_',TableName) SourceQuery
 FROM conf.DimensionTable dimTable
@@ -11,6 +12,7 @@ WHERE TabularModelName = @TabularModel
 
 UNION ALL
 
+-- Vrácení seznamu faktových tabulek patřících do dané analytické databáze.
 SELECT 
 TableName,
 CONCAT('SELECT * FROM ',SchemaName,'.F_',TableName) SourceQuery

@@ -5,6 +5,7 @@ AS
 
 SELECT
 ColumnName,
+-- Vřevedení databázových datových typů na datové typy analytických databází.
 CASE 
 	WHEN DataType LIKE '%CHAR%' THEN 'STRING'
 	WHEN DataType LIKE '%DATE%' THEN 'DATETIME'
@@ -17,6 +18,7 @@ END AS DataType
 FROM
 (
 
+-- Vrácení metadat sloupců pro danou dimenzionální tabulku.
 SELECT 
 ColumnName,
 DataType
@@ -28,6 +30,7 @@ WHERE TabularModelName = @TabularModel AND TableName = @TableName
 
 UNION ALL
 
+-- Vrácení ID sloupce s primárním klíčem pro danou dimenzionální tabulku.
 SELECT
 CONCAT(dimTable.TableName,'ID') ColumnName,
 'INT' DataType
@@ -38,6 +41,7 @@ WHERE TabularModelName = @TabularModel AND TableName = @TableName
 
 UNION ALL
 
+-- Vrácení metadat sloupců pro danou faktovou tabulku.
 SELECT 
 ColumnName,
 DataType

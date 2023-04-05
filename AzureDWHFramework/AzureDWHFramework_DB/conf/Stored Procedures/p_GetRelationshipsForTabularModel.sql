@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [conf].[p_GetRelationshipsForTabularModel]
   @TabularModel NVARCHAR(255)
   AS
+  -- Vrácení metadat vazeb pro danou faktovou tabulku.
   SELECT 
   factTable.TableName TableN,
   dimTable.TableName TableOne,

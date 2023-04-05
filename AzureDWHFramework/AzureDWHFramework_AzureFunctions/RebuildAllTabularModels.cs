@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.IO;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
@@ -28,11 +28,12 @@ namespace AzureDWHFramework_TabularModelGenerator
             {
                 string keyVaultUrl = req.Query["keyVault"];
 
+                // Připojení k službě Azure Key Vault.
                 AzureServiceTokenProvider azureServiceTokenProvider = new AzureServiceTokenProvider();
                 HttpClient httpClient = new HttpClient();
-
                 KeyVaultClient keyVaultClient = new KeyVaultClient(new KeyVaultClient.AuthenticationCallback(azureServiceTokenProvider.KeyVaultTokenCallback), httpClient);
 
+                // Získání tajných hodnot z Azure Key Vault.
                 string sqlConnString = keyVaultClient.GetSecretAsync(keyVaultUrl, "DatabaseConnectionString").Result.Value;
                 string ssasConnString = keyVaultClient.GetSecretAsync(keyVaultUrl, "SSASConnectionString").Result.Value;
 
@@ -46,23 +47,29 @@ namespace AzureDWHFramework_TabularModelGenerator
                 string appUrl = keyVaultClient.GetSecretAsync(keyVaultUrl, "TabularModelGeneratorURI").Result.Value;
 
 
+                // Připojení k datovému skladu.
                 databaseConnector = new MSSQLDatabaseConnector(sqlConnString);
                 SSASDatabaseConnector ssasConnector = new SSASDatabaseConnector(ssasConnString);
 
+                // Připojení k Azure Analysis Services Serveru.
                 databaseConnector.InitConnection();
                 Server server = await ssasConnector.InitConnection(appUrl, tenantId, appId, appSecret);
 
                 databaseConnector.WriteFrameworkLog(functionName, "Info", "Rebuild all tabular models has started");
 
+
                 DataTable tabularModels = databaseConnector.GetTabularModels();
                 foreach (DataRow tabularModel in tabularModels.Rows)
                 {
+                    // Vygenerování analytických databází.
                     string modelName = tabularModel["TabularModelName"].ToString();
                     ssasConnector.RebuildTabularDatabase(modelName, ssasDataSourceConnString, ssasDataSourceAccount, ssasDataSourcePassword);
                     Database database = server.Databases.FindByName(modelName);
                     DataTable tables = databaseConnector.GetTablesForTabularModel(modelName);
+                    // Vygenerování tabulek pro danou analytickou databází.
                     ssasConnector.RebuildTabularModelTables(database, tables);
 
+                    // Vygenerování sloupců tabulek v dané analytické databázi.
                     foreach (DataRow table in tables.Rows)
                     {
                         string tableName = table["TableName"].ToString();
@@ -70,19 +77,22 @@ namespace AzureDWHFramework_TabularModelGenerator
                         ssasConnector.RebuildTableColumns(database, columns, tableName);
                     }
 
+                    // Vygenerování vazeb pro danou analytickou databází.
                     DataTable relationships = databaseConnector.GetRelationshipsForTabularModel(modelName);
                     ssasConnector.RebuildTablarModelRelationships(database, relationships);
                 }
 
                
             }
-            catch(Exception ex)
+            
+            catch (Exception ex)
             {
+                // Zalogování chyby.
                 databaseConnector.WriteFrameworkLog(functionName, "Error", ex.Message + "\r\n" + ex.StackTrace);
                 return new BadRequestObjectResult("Rebuild all tabular models has ended with error \r\n" + ex.Message + "\r\n" + ex.StackTrace);
             }
 
-
+            // Zalogování ukončení generování dokumentace.
             databaseConnector.WriteFrameworkLog(functionName, "Info", "Rebuild all tabular models has finished successfully");
             return new OkObjectResult("Rebuild all tabular models has finished successfully");
         }

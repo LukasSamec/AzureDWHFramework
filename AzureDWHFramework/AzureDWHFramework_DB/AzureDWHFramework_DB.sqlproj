@@ -130,7 +130,6 @@
     <Build Include="conf\Tables\DimensionTable_BusinessArea.sql" />
     <Build Include="etl\Views\v_StageMapping.sql" />
     <Build Include="conf\Stored Procedures\p_GetDataObjectsDocumentationData.sql" />
-    <Build Include="etl\Stored Procedures\p_GetColumnMapping.sql" />
     <Build Include="etl\Views\v_TabularModel.sql" />
     <Build Include="log\Stored Procedures\p_GetLogStatus.sql" />
     <Build Include="etl\Stored Procedures\p_GetTabularModels.sql" />

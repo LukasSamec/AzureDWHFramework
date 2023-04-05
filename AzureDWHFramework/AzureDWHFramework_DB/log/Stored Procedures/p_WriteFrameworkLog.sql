@@ -4,5 +4,6 @@ CREATE PROCEDURE [log].[p_WriteFrameworkLog]
 @Type NVARCHAR(10),
 @Message NVARCHAR(MAX)
 AS
-INSERT INTO log.FrameworkLog(CreatedDate, Type, Message, ProcedureName) 
-VALUES(GETUTCDATE(), @Type, @Message, @ProcedureName)
+	-- Vložení hodnot ze vstupních parametrů do tabulky log.FrameworkLog.
+	INSERT INTO log.FrameworkLog(CreatedDate, Type, Message, ProcedureName) 
+	VALUES(GETUTCDATE(), @Type, @Message, @ProcedureName)
