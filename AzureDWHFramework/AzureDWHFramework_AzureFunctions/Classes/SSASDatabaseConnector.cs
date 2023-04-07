@@ -1,16 +1,12 @@
 ﻿using Microsoft.AnalysisServices;
 using Microsoft.AnalysisServices.Tabular;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
-using System;
-using System.Collections.Generic;
 using System.Data;
-using System.Text;
 using System.Threading.Tasks;
 using Database = Microsoft.AnalysisServices.Database;
 using DataColumn = Microsoft.AnalysisServices.Tabular.DataColumn;
 using DataType = Microsoft.AnalysisServices.Tabular.DataType;
 using Partition = Microsoft.AnalysisServices.Tabular.Partition;
-using Relationship = Microsoft.AnalysisServices.Tabular.Relationship;
 using Server = Microsoft.AnalysisServices.Server;
 
 
@@ -24,7 +20,14 @@ namespace AzureDWHFramework_TabularModelGenerator
         {
             this.connectionString = connectionString;
         }
-
+        /// <summary>
+        /// Metoda připojující k službě Azure Analysis Services a vracející objekt serveru služby Azure Analysis Services.
+        /// </summary>
+        /// <param name="url">URL pro ověřování.</param>
+        /// <param name="tenantId">ID tenantu z Azure Active Directory.</param>
+        /// <param name="appId">ID aplikace z Azure Active Directory.</param>
+        /// <param name="appSecret">Tajný klíč aplikace z Azure Active Directory.</param>
+        /// <returns>Objekt serveru služby Azure Analysis Services.</returns>
         public async Task<Server> InitConnection(string url, string tenantId, string appId, string appSecret)
         {
             server = new Server();
@@ -33,7 +36,14 @@ namespace AzureDWHFramework_TabularModelGenerator
             server.Connect(connectionStringFinal);
             return server;
         }
-
+        /// <summary>
+        /// Metoda vracející token sloužící k autentizaci při připojování ke službě Azure Analysis Services.
+        /// </summary>
+        /// <param name="url">URL pro ověřování.</param>
+        /// <param name="tenantId">ID tenantu z Azure Active Directory.</param>
+        /// <param name="appId">ID aplikace z Azure Active Directory.</param>
+        /// <param name="appSecret">Tajný klíč aplikace z Azure Active Directory.</param>
+        /// <returns>Token sloužící k autentizaci při připojování ke službě Azure Analysis Services.</returns>
         private async Task<string> GetAccessToken(string url, string tenantId, string appId, string appSecret)
         {
             string authorityUrl = $"https://login.microsoftonline.com/{tenantId}";
@@ -86,7 +96,11 @@ namespace AzureDWHFramework_TabularModelGenerator
                 newDatabase.Update(UpdateOptions.ExpandFull);
             }
         }
-
+        /// <summary>
+        /// Metoda generující tabulky a jejich partitions v dané analytické databázi.
+        /// </summary>
+        /// <param name="database">Objekt analytické databáze.</param>
+        /// <param name="tables">Datová tabulky se seznamem tabulek patřících do dané anyltické databáze.</param>
         public void RebuildTabularModelTables(Database database, DataTable tables)
         {
             foreach (DataRow table in tables.Rows)
@@ -116,7 +130,12 @@ namespace AzureDWHFramework_TabularModelGenerator
 
             database.Update(UpdateOptions.ExpandFull);
         }
-
+        /// <summary>
+        /// Tabulka generující sloupců pro zadanou tabulku v zadané analytické databázi.
+        /// </summary>
+        /// <param name="database">Objekt analytické databáze.</param>
+        /// <param name="columns">Datová tabulka s metadaty sloupců dané tabulky.</param>
+        /// <param name="tableName">Název tabulky.</param>
         public void RebuildTableColumns(Database database, DataTable columns, string tableName)
         {
             Table table = database.Model.Tables.Find(tableName);
@@ -146,8 +165,6 @@ namespace AzureDWHFramework_TabularModelGenerator
                         break;
                 }
 
-
-
                DataColumn newColumn = new DataColumn()
                 {
                     Name = columnName,
@@ -160,7 +177,11 @@ namespace AzureDWHFramework_TabularModelGenerator
 
             database.Update(UpdateOptions.ExpandFull);
         }
-
+        /// <summary>
+        /// Metoda generující v analytické databází vazby mezi tabulkami na základě metadat.
+        /// </summary>
+        /// <param name="database">Objekt analytické databáze.</param>
+        /// <param name="relationships">Datová tabulka obsahující metadata vazeb.</param>
         public void RebuildTablarModelRelationships(Database database, DataTable relationships)
         {
 
@@ -195,7 +216,6 @@ namespace AzureDWHFramework_TabularModelGenerator
                 };
 
                 database.Model.Relationships.Add(newRalationship);
-
             }
 
             database.Update(UpdateOptions.ExpandFull);

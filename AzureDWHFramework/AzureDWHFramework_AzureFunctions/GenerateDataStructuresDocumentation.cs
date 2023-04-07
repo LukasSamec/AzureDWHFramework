@@ -6,20 +6,14 @@ using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
 using Microsoft.Azure.Services.AppAuthentication;
 using Microsoft.Azure.KeyVault;
 using System.Net.Http;
 using AzureDWHFramework_TabularModelGenerator;
 using System.Data;
-using System.Threading;
-using Microsoft.IdentityModel.Clients.ActiveDirectory;
-using Microsoft.Rest.Azure.Authentication;
-using Microsoft.Azure.Management.DataLake.Store;
 using System.Text;
 using System.Linq;
 using Azure.Storage.Files.DataLake;
-using Azure.Identity;
 using Azure.Storage;
 //http://localhost:7071/api/GenerateDataStructuresDocumentation?keyVault=https://azuredwhframework.vault.azure.net
 namespace AzureDWHFramework_AzureFunctions.Documentation
@@ -71,9 +65,7 @@ namespace AzureDWHFramework_AzureFunctions.Documentation
 
                 // Připojení k službě Azure Data Storace, ke contarineru documentation, složce documentation a souboru Documentation.csv.
                 StorageSharedKeyCredential sharedKeyCredential =new StorageSharedKeyCredential(adlsAccountName, adlsAccountKey);
-
                 string dfsUri = "https://" + adlsAccountName + ".dfs.core.windows.net";
-
                 DataLakeServiceClient dataLakeServiceClient = new DataLakeServiceClient (new Uri(dfsUri), sharedKeyCredential);
                 DataLakeFileSystemClient fileSystemClient = dataLakeServiceClient.GetFileSystemClient("documentation");
                 DataLakeDirectoryClient directoryClient = fileSystemClient.GetDirectoryClient("documentation");
@@ -81,7 +73,6 @@ namespace AzureDWHFramework_AzureFunctions.Documentation
 
                 // Vložení souboru do Azure Data Storace.
                 FileStream fileStream = File.OpenRead("Documentation.csv");
-
                 long fileSize = fileStream.Length;
                 await fileClient.AppendAsync(fileStream, offset: 0);
                 await fileClient.FlushAsync(position: fileSize);
@@ -91,11 +82,15 @@ namespace AzureDWHFramework_AzureFunctions.Documentation
             {
                 // Zalogování chyby.
                 databaseConnector.WriteFrameworkLog(functionName, "Error", ex.Message + "\r\n" + ex.StackTrace);
+                // Uzavření připojení k databázi.
+                databaseConnector.CloseConnection();
                 return new BadRequestObjectResult("Generate Data Structures Documentation has ended with error \r\n" + ex.Message + "\r\n" + ex.StackTrace);
             }
 
             // Zalogování ukončení generování dokumentace.
             databaseConnector.WriteFrameworkLog(functionName, "Info", "Generate Data Structures Documentation has finished successfully");
+            // Uzavření připojení k databázi.
+            databaseConnector.CloseConnection();
             return new OkObjectResult("Generate Data Structures Documentation has finished successfully");
         }
     }

@@ -1,12 +1,10 @@
 ﻿using System;
-using System.IO;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
 using Microsoft.Azure.KeyVault;
 using Microsoft.Azure.Services.AppAuthentication;
 using System.Net.Http;
@@ -89,11 +87,15 @@ namespace AzureDWHFramework_TabularModelGenerator
             {
                 // Zalogování chyby.
                 databaseConnector.WriteFrameworkLog(functionName, "Error", ex.Message + "\r\n" + ex.StackTrace);
+                // Uzavření připojení k databázi.
+                databaseConnector.CloseConnection();
                 return new BadRequestObjectResult("Rebuild all tabular models has ended with error \r\n" + ex.Message + "\r\n" + ex.StackTrace);
             }
 
             // Zalogování ukončení generování dokumentace.
             databaseConnector.WriteFrameworkLog(functionName, "Info", "Rebuild all tabular models has finished successfully");
+            // Uzavření připojení k databázi.
+            databaseConnector.CloseConnection();
             return new OkObjectResult("Rebuild all tabular models has finished successfully");
         }
     }
