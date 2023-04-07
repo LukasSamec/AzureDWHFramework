@@ -131,7 +131,6 @@
     <Build Include="etl\Views\v_StageMapping.sql" />
     <Build Include="conf\Stored Procedures\p_GetDataObjectsDocumentationData.sql" />
     <Build Include="etl\Views\v_TabularModel.sql" />
-    <Build Include="log\Stored Procedures\p_GetLogStatus.sql" />
     <Build Include="etl\Stored Procedures\p_GetTabularModels.sql" />
     <Build Include="etl\Stored Procedures\p_GetDwhMapping.sql" />
     <Build Include="etl\Stored Procedures\p_GetSuccessfulAreaList.sql" />
@@ -156,6 +155,7 @@
     <Build Include="Security\stage_navision.sql" />
     <Build Include="Security\stage_csv.sql" />
     <Build Include="Security\dwh.sql" />
+    <Build Include="log\Stored Procedures\p_GetLogStatus.sql" />
   </ItemGroup>
   <ItemGroup>
     <ArtifactReference Include="C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\IDE\Extensions\Microsoft\SQLDB\Extensions\SqlServer\AzureV12\SqlSchemas\master.dacpac">

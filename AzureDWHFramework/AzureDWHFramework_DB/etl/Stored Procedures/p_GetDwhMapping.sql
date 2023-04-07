@@ -6,6 +6,7 @@ AS
 
 DECLARE @cmd NVARCHAR(max)
 
+-- Pokud není hodnota vstupního parametru @Area 'all'. Vrátí select aktivní uložené procedury pro načítání dimenzionálních nebo faktových tabulek pro danou hodnotu Layer a dané businessové oblasti.
 IF @Area <> 'all' 
 BEGIN
 SELECT @cmd = N'
@@ -27,6 +28,7 @@ EXEC sp_executesql @cmd
 
 END
 ELSE
+-- Pokud je hodnota vstupního parametru @Area 'all'. Vrátí select aktivní uložené procedury pro načítání dimenzionálních nebo faktových tabulek pro danou hodnotu Layer.
 BEGIN
 
 SELECT @cmd = N'

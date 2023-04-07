@@ -8,6 +8,7 @@ AS
 DECLARE 
 @cmd NVARCHAR(max)
 
+-- Pokud není hodnota vstupního parametru @Area 'all'. Vrátí select aktivní metadata pro načítání stage tabulek pro daný dataset a businessové oblasti.
 IF @Area <> 'all' 
 BEGIN
 
@@ -33,6 +34,7 @@ SELECT @cmd = N'
   EXEC sp_executesql @cmd 
 
 END
+-- Pokud je hodnota vstupního parametru @Area 'all'. Vrátí select aktivní metadata pro načítání stage tabulek pro daný dataset.
 ELSE
 BEGIN
 

@@ -2,6 +2,7 @@
 
 AS
 
+-- Vrácení popisu analytických databází.
 SELECT DISTINCT 
 'Analytical database' AS Type,
 tabModel.TabularModelName Name,
@@ -15,6 +16,7 @@ conf.TabularModel tabModel
 
 UNION ALL
 
+-- Vrácení popisu stage tabulek.
 SELECT DISTINCT
 'Stage Table' AS Type,
 CONCAT(stageTable.SchemaName,'.',stageTable.TableName),
@@ -28,6 +30,7 @@ conf.StageTable stageTable
 
 UNION ALL
 
+-- Vrácení popisu sloupců stage tabulek.
 SELECT DISTINCT
 'Stage Table Column' AS Type,
 stageTableColumn.ColumnName,
@@ -42,6 +45,7 @@ INNER JOIN conf.StageTable stageTable ON stageTable.StageTableID = stageTableCol
 
 UNION ALL
 
+-- Vrácení popisu dimenzionálních tabulek.
 SELECT DISTINCT
 'Dimension Table' AS Type,
 CONCAT(dimTable.SchemaName,'.',dimTable.TableName),
@@ -57,6 +61,7 @@ INNER JOIN conf.DimensionTable dimTable ON dimTable.DimensionTableID = tabModelD
 
 UNION ALL
 
+-- Vrácení popisu sloupců dimenzionálních tabulek.
 SELECT DISTINCT
 'Dimension Table Column' AS Type,
 dimTableColumn.ColumnName,
@@ -75,6 +80,7 @@ INNER JOIN conf.StageTable stageTable ON stageTable.StageTableID = stageTableCol
 
 UNION ALL
 
+-- Vrácení popisu faktových tabulek.
 SELECT DISTINCT
 'Fact Table' AS Type,
 CONCAT(factTable.SchemaName,'.',factTable.TableName),
@@ -90,6 +96,7 @@ INNER JOIN conf.FactTable factTable ON factTable.FactTableID = tabModelFactTable
 
 UNION ALL
 
+-- Vrácení popisu sloupců faktových tabulek.
 SELECT DISTINCT
 'Fact Table Column' AS Type,
 factTableColumn.ColumnName,

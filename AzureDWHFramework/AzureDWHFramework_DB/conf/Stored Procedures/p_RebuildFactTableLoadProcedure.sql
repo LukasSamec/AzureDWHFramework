@@ -8,6 +8,13 @@ DECLARE @sql AS NVARCHAR(MAX)
 DECLARE @ProcedureName AS NVARCHAR(100) = OBJECT_NAME(@@PROCID)
 DECLARE @LogMessage AS NVARCHAR(MAX)
 
+BEGIN TRY
+
+-- Zalogování začátku procedury.
+SET @LogMessage = 'Rebuilding load procedure ' + @SchemaName + '.p_load_F_' + @TableName + ' has started'
+EXEC log.p_WriteFrameworkLog @ProcedureName, 'Info', @LogMessage
+
+-- Zjištění schématu zdrojové tabulky.
 DECLARE @StageTableSchema AS NVARCHAR(255) = (
   SELECT 
   DISTINCT
@@ -20,6 +27,7 @@ DECLARE @StageTableSchema AS NVARCHAR(255) = (
   WHERE factTable.FactTableID = @FactTableID
 )
 
+-- Zjištění názvu zdrojové tabulky.
 DECLARE @StageTableName AS NVARCHAR(255) = (
   SELECT 
   DISTINCT
@@ -32,6 +40,7 @@ DECLARE @StageTableName AS NVARCHAR(255) = (
   WHERE factTable.FactTableID = @FactTableID
 )
 
+-- Zjištění podmínky pro smazání dat z faktové tabulky.
 DECLARE @DeleteCondition AS NVARCHAR(255) = (
   SELECT 
   DISTINCT
@@ -41,6 +50,7 @@ DECLARE @DeleteCondition AS NVARCHAR(255) = (
   WHERE factTable.FactTableID = @FactTableID AND LoadWithIncrement = 1
 )
 
+-- Zjištění podmínky pro inkrementální načítání z faktové tabulky.
 DECLARE @IncrementCondition AS NVARCHAR(255) = (
   SELECT 
   DISTINCT
@@ -50,17 +60,15 @@ DECLARE @IncrementCondition AS NVARCHAR(255) = (
   WHERE factTable.FactTableID = @FactTableID AND LoadWithIncrement = 1
 )
 
-BEGIN TRY
 
-SET @LogMessage = 'Rebuilding load procedure ' + @SchemaName + '.p_load_F_' + @TableName + ' has started'
-
-EXEC log.p_WriteFrameworkLog @ProcedureName, 'Info', @LogMessage
-
+-- Vygenerování příkazu pro smazání uložené procedury, pokud uložená procedura existuje.
 SET @sql = 'IF OBJECT_ID(''' + @SchemaName + '.p_Load_F_' + @TableName + ''', N''P'') IS NOT NULL ' + 'DROP PROCEDURE ' + @SchemaName + '.p_load_F_' + @TableName
 
+-- Spuštění příkazu pro smazání uložené procedury, pokud uložená procedura existuje.
 --print (@sql)
 EXEC sp_executesql @sql
 
+-- Vygenerování příkazu create procedure.
 SET @sql = 
 'CREATE PROCEDURE ' + @SchemaName + '.p_Load_F_' + @TableName + CHAR(13) +
 '@ETLLogID BIGINT ' + CHAR(13) +
@@ -77,16 +85,18 @@ SET @sql =
 
 'INSERT INTO @SummaryOfChanges (Change, Code) VALUES (''DELETE'', (SELECT COUNT(*) FROM '+ @SchemaName + '.F_' + @TableName +'))' + CHAR(13)
 
+-- Pokud je hodnota delete condition prázdná. Přidá se na začátek uložené procedury příkaz truncate table.
 IF @DeleteCondition IS NULL
 BEGIN
 SET @sql = @sql + 'TRUNCATE TABLE '+ @SchemaName + '.F_' + @TableName + CHAR(13)
 END
-
+-- Pokud není hodnota delete condition prázdná. Přidá se na začátek uložené procedury příkaz delete from s podmínkou v delete condition.
 IF @DeleteCondition IS NOT NULL
 BEGIN
 SET @sql = @sql + 'DELETE FROM '+ @SchemaName + '.F_' + @TableName + 'WHERE ' + @DeleteCondition + CHAR(13)
 END
 
+-- Sestavení příkazů insert into se seznamem sloupců, které se mají načítat.
 SET @sql = @sql +
 'INSERT INTO '+ @SchemaName + '.F_' + @TableName + CHAR(13) +
  '(' + CHAR(13) +
@@ -104,12 +114,12 @@ SET @sql = @sql +
   'UpdatedETLLogID,' + CHAR(13) +
   'Active' + CHAR(13) +
   ')' + CHAR(13) +
+  --
  'SELECT' + CHAR(13) +
  (
 	  SELECT 
 	  DISTINCT
 	  STRING_AGG(CASE WHEN dimTable.DimensionTableID IS NOT NULL THEN CONCAT ('ISNULL('+ dimTable.SchemaName, dimTable.TableName,stageTableColumn.ColumnName +'.' + dimTable.TableName + 'ID, -1)') ELSE stageTableColumn.ColumnName END, ',' + CHAR(13))
-	  --STRING_AGG(COALESCE('ISNULL('+ dimTable.SchemaName, dimTable.TableName,stageTableColumn.ColumnName +'.' + dimTable.TableName + 'ID, -1)' , stageTableColumn.ColumnName), ',' + CHAR(13))
 	  FROM
 	  conf.FactTable factTable
 	  LEFT JOIN conf.FactTableColumn factTableColumn ON factTable.FactTableID = factTableColumn.FactTableID
@@ -136,7 +146,8 @@ SET @sql = @sql +
 	  WHERE factTable.FactTableID = @FactTableID
   )  + CHAR(13)
 
-  IF @DeleteCondition IS NOT NULL
+  -- Pokud hodnota increment condition není prázdná, připojí se na konec selectu kauzule where s podmíkou v increment condition.
+  IF @IncrementCondition IS NOT NULL
 	BEGIN
 	SET @sql = @sql +'WHERE ' + @IncrementCondition + CHAR(13)
 	END
@@ -165,11 +176,13 @@ SET @sql = @sql +
 --print (@sql)
 EXEC sp_executesql @sql
 
+-- Zalogování konce procedury.
 SET @LogMessage = 'Rebuilding load procedure ' + @SchemaName + '.p_load_F_' + @TableName + ' has finished'
 
 EXEC log.p_WriteFrameworkLog @ProcedureName, 'Info', @LogMessage
 
 END TRY
+-- Zalogování chyby procedury.
 BEGIN CATCH
 	DECLARE @ErrorMessage NVARCHAR(4000) = ERROR_MESSAGE()
 	EXEC log.p_WriteFrameworkLog @ProcedureName ,'Error', @ErrorMessage;

@@ -5,7 +5,7 @@ AS
 
 SELECT
 ColumnName,
--- Vřevedení databázových datových typů na datové typy analytických databází.
+-- Převedení databázových datových typů na datové typy analytických databází.
 CASE 
 	WHEN DataType LIKE '%CHAR%' THEN 'STRING'
 	WHEN DataType LIKE '%DATE%' THEN 'DATETIME'

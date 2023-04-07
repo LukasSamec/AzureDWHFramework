@@ -11,16 +11,21 @@ BEGIN TRY
 
 SET @LogMessage = 'Rebuilding stage table ' + @SchemaName + '.' + @TableName + ' has started'
 
+-- Zalogování začátku procedury.
 EXEC log.p_WriteFrameworkLog @ProcedureName, 'Info', @LogMessage
 
+-- Vygenerování příkazu pro smazání tabulky, pokud tabulka existuje.
 SET @sql = 'IF OBJECT_ID(''' + @SchemaName + '.' + @TableName + ''', N''U'') IS NOT NULL ' + 'DROP TABLE ' + @SchemaName + '.' + @TableName
 
+-- Spuštění příkazu pro smazání tabulky, pokud tabulka existuje.
 --print (@sql)
 EXEC sp_executesql @sql
 
+-- vygenerování příkazu create table.
 SET @sql = 
 'CREATE TABLE ' + @SchemaName + '.' + @TableName + ' (' +
  (
+ -- Přidání sloupců pro danou stage tabulku.
    SELECT STRING_AGG
    (
 		CONCAT
@@ -30,13 +35,16 @@ SET @sql =
    ) 
 	FROM conf.StageTableColumn WHERE StageTableID = @StageTableID
  ) +
+    -- Přidání auditních sloupců.
 ',[InsertedETLLogID] BIGINT NOT NULL FOREIGN KEY REFERENCES log.ETLLog(ETLLogID)' +
 ',[UpdatedETLLogID] BIGINT NOT NULL FOREIGN KEY REFERENCES log.ETLLog(ETLLogID)' +
 ')'
 
+-- Spuštění příkazu create table.
 --print (@sql)
 EXEC sp_executesql @sql
 
+-- Přiřazení vytvořené stage tabulky do businessových oblastí.
 INSERT INTO conf.StageTable_BusinessArea
 (
 StageTableID, 
@@ -48,10 +56,11 @@ INNER JOIN conf.BusinessArea businessArea ON businessarea.BusinessAreaName = TRI
 WHERE TableName = @TableName AND SchemaName = @SchemaName
 
 SET @LogMessage = 'Rebuilding stage table ' + @SchemaName + '.' + @TableName + ' has finished'
-
+-- Zalogování konce procedury.
 EXEC log.p_WriteFrameworkLog @ProcedureName, 'Info', @LogMessage
 
 END TRY
+-- Zalogování chyby procedury.
 BEGIN CATCH
 	DECLARE @ErrorMessage NVARCHAR(4000) = ERROR_MESSAGE()
 	EXEC log.p_WriteFrameworkLog @ProcedureName ,'Error', @ErrorMessage;
