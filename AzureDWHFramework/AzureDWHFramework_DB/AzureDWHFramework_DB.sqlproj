@@ -156,6 +156,7 @@
     <Build Include="Security\stage_csv.sql" />
     <Build Include="Security\dwh.sql" />
     <Build Include="log\Stored Procedures\p_GetLogStatus.sql" />
+    <Build Include="conf\Stored Procedures\p_RebuildAllTables.sql" />
   </ItemGroup>
   <ItemGroup>
     <ArtifactReference Include="C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\IDE\Extensions\Microsoft\SQLDB\Extensions\SqlServer\AzureV12\SqlSchemas\master.dacpac">

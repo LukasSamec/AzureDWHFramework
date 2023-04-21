@@ -8,6 +8,12 @@ DECLARE @ProcedureName AS NVARCHAR(100) = OBJECT_NAME(@@PROCID)
 DECLARE @LogMessage AS NVARCHAR(MAX)
 DECLARE @LoadType AS NVARCHAR(100)
 
+BEGIN TRY
+
+SET @LogMessage = 'Rebuilding load procedure ' + @SchemaName + '.p_load_D_' + @TableName + ' has started'
+EXEC log.p_WriteFrameworkLog @ProcedureName, 'Info', @LogMessage
+
+-- Zjištění schématu zdrojové tabulky.
 DECLARE @StageTableSchema AS NVARCHAR(255) = (
   SELECT 
   DISTINCT
@@ -20,6 +26,7 @@ DECLARE @StageTableSchema AS NVARCHAR(255) = (
   WHERE dimTable.DimensionTableID = @DimensionTableID
 )
 
+-- Zjištění názvu zdrojové tabulky.
 DECLARE @StageTableName AS NVARCHAR(255) = (
   SELECT 
   DISTINCT
@@ -32,22 +39,17 @@ DECLARE @StageTableName AS NVARCHAR(255) = (
   WHERE dimTable.DimensionTableID = @DimensionTableID
 )
 
-BEGIN TRY
-
+-- Zjištění typu načítání dimenzionální tabulky.
 SET @LoadType = (SELECT LoadType FROM conf.DimensionTable WHERE TableName = @TableName AND SchemaName = @SchemaName)
 
-SET @LogMessage = 'Rebuilding load procedure ' + @SchemaName + '.p_load_D_' + @TableName + ' has started'
-
-EXEC log.p_WriteFrameworkLog @ProcedureName, 'Info', @LogMessage
-
+-- Vygenerování příkazu pro smazání uložené procedury, pokud uložená procedura existuje.
 SET @sql = 'IF OBJECT_ID(''' + @SchemaName + '.p_Load_D_' + @TableName + ''', N''P'') IS NOT NULL ' + 'DROP PROCEDURE ' + @SchemaName + '.p_load_D_' + @TableName
 
-
-
-
+-- Spuštění příkazu pro smazání uložené procedury, pokud uložená procedura existuje.
 --PRINT @sql
 EXEC sp_executesql @sql
 
+-- Vygenerování příkazu create procedure.
 SET @sql = 
 'CREATE PROCEDURE ' + @SchemaName + '.p_Load_D_' + @TableName + CHAR(13) +
 '@ETLLogID BIGINT ' + CHAR(13) +
@@ -60,7 +62,7 @@ SET @sql =
 'DECLARE @UpdatedCount INT = 0' + CHAR(13) +
 'BEGIN TRY' + CHAR(13) +
 'EXEC log.p_WriteETLTableLoadLog @ETLLogID = @ETLLogID, @Name = ''' +  @SchemaName + '.p_load_D_' + @TableName + ''', @TargetSchemaName = ''' + @SchemaName + ' '', @TargetTableName = ''D_' + @TableName + ''', @Type = ''Stored procedure'', @Status = 1, @StatusDescription = ''Running'', @NewETLTableLoadLogID = @ETLTableLoadLogID OUTPUT' + CHAR(13) +
-
+-- Vytvoření dočasné tabulky pro ukládání změn provedených uvnitř merge příkazu.
 'CREATE TABLE ' + '#D_' + @TableName + ' ( ' +
 'Change NVARCHAR(255), ' +
  (
@@ -73,13 +75,15 @@ SET @sql =
    ) 
 	FROM conf.DimensionTableColumn WHERE DimensionTableID = @DimensionTableID
  ) 
+  -- Přidání sloupců [RowValidDateFrom] a [RowValidDateTo], pokud je typ načítání SCD2.
  + CASE WHEN @LoadType = 'SCD2' THEN ',[RowValidDateFrom] DATETIME2 NULL' ELSE '' END +
  + CASE WHEN @LoadType = 'SCD2' THEN ',[RowValidDateTo] DATETIME2 NULL' ELSE '' END +
+  -- Přidání auditních sloupců.
 ',[InsertedETLLogID] BIGINT NOT NULL' +
 ',[UpdatedETLLogID] BIGINT NOT NULL' +
 ',[Active] BIT NOT NULL ' +
 ')' + CHAR(13) +
-
+-- Vložení -1 řádku do dimenzionální tabulky, pokud řádek neexistuje.
 'IF NOT EXISTS (SELECT 1 FROM '+ @SchemaName + '.D_' + @TableName +' WHERE ' + @TableName + 'ID = -1)' + CHAR(13) +
 'BEGIN' + CHAR(13) +
 'SET IDENTITY_INSERT '+ @SchemaName + '.D_' + @TableName +' ON;' + CHAR(13) +
@@ -127,13 +131,14 @@ SET @sql =
 'SET IDENTITY_INSERT '+ @SchemaName + '.D_' + @TableName +' OFF;' + CHAR(13) +
 'END'+ CHAR(13)
 
-
+-- Sestavení příkazu merge pro SCD1.
 IF @LoadType = 'SCD1'
 BEGIN
 SET @sql = @sql +
 	'MERGE ' +  @SchemaName + '.D_' + @TableName + ' AS target' + CHAR(13) +
 	'USING' + CHAR(13) +
 	'(' + CHAR(13) +
+	-- Sestavení zdrojového příkazu select ze stage tabulky.
 	'SELECT ' + CHAR(13) +
 		(
 			SELECT 
@@ -156,6 +161,7 @@ SET @sql = @sql +
 		  INNER JOIN conf.StageTable stageTable ON stageTable.StageTableID = stageTableColumn.StageTableID
 		  WHERE dimTableColumn.BusinessKey = 1 AND dimTable.DimensionTableID = @DimensionTableID
 	  ) + CHAR(13) +
+	  -- Aktualizace řádku, pokud daný business klíč existuje na zdroji i v dimenzionální tabulce.
 	  'WHEN MATCHED THEN UPDATE SET' + CHAR(13) +
 	  (
 		  SELECT 
@@ -170,6 +176,7 @@ SET @sql = @sql +
 	  ) +','+ CHAR(13) +
 	  'target.UpdatedETLLogID = @ETLLogID,' + CHAR(13) +
 	  'target.Active = 1' + CHAR(13) +
+	  -- Vložení řádku, pokud daný business klíč existuje na zdroji a neexistuje v dimenzionální tabulce.
 	  'WHEN NOT MATCHED THEN INSERT' + CHAR(13) +
 	  '(' + CHAR(13) +
 	  (
@@ -196,6 +203,7 @@ SET @sql = @sql +
 	  +'@ETLLogID,'+ CHAR(13)  +
 	  +'1'+ CHAR(13)  +
 	  ')' + CHAR(13) +
+	  -- Zneaktivnění řádku, pokud se daný business klíč nevyskytuje na zdroji ale existuje v dimenzionální tabulce.
 	  'WHEN NOT MATCHED BY SOURCE AND target.Active = 1 AND target.' + @TableName + 'ID <> -1 THEN' + CHAR(13)  +
 	  'UPDATE SET target.Active = 0' + CHAR(13)  +
 	  'OUTPUT $action,' 
@@ -209,12 +217,14 @@ SET @sql = @sql +
 	  )  +','+ CHAR(13)  +
 	  '@ETLLogID, @ETLLogID, 1' + ' INTO #' + 'D_' + @TableName + ';' + CHAR(13) 
   END
+  -- Sestavení příkazu merge pro SCD2.
   IF @LoadType = 'SCD2'
   BEGIN
   SET @sql = @sql +
 	'MERGE ' +  @SchemaName + '.D_' + @TableName + ' AS target' + CHAR(13) +
 	'USING' + CHAR(13) +
 	'(' + CHAR(13) +
+	-- Sestavení zdrojového příkazu select ze stage tabulky.
 	'SELECT ' + CHAR(13) +
 		(
 			SELECT 
@@ -237,6 +247,7 @@ SET @sql = @sql +
 		  INNER JOIN conf.StageTable stageTable ON stageTable.StageTableID = stageTableColumn.StageTableID
 		  WHERE dimTableColumn.BusinessKey = 1 AND dimTable.DimensionTableID = @DimensionTableID
 	  ) + CHAR(13) +
+	  -- Zneaktivnění řádku, pokud se hodnota v minimálně jednom sloupci liší.
 	  'WHEN MATCHED AND' + CHAR(13) +
 	  (
 		  SELECT 
@@ -250,6 +261,7 @@ SET @sql = @sql +
 		  WHERE dimTableColumn.BusinessKey <> 1 AND dimTable.DimensionTableID = @DimensionTableID
 	  ) + CHAR(13) +
 	  'THEN UPDATE SET target.RowValidDateTo = GETUTCDATE(), target.Active = 0' + CHAR(13) +
+	  -- Vložení řádku, pokud daný business klíč existuje na zdroji a neexistuje v dimenzionální tabulce.
 	  'WHEN NOT MATCHED BY TARGET THEN INSERT' + CHAR(13) +
 	  '(' + CHAR(13) +
 	  (
@@ -276,6 +288,7 @@ SET @sql = @sql +
 	  +'@ETLLogID,'+ CHAR(13)  +
 	  +'1'+ CHAR(13)  +
 	  ')' + CHAR(13) +
+	  -- Zneaktivnění řádku, pokud se daný business klíč nevyskytuje na zdroji ale existuje v dimenzionální tabulce.
 	  'WHEN NOT MATCHED BY SOURCE AND target.Active = 1 AND target.' + @TableName + 'ID <> -1 THEN' + CHAR(13)  +
 	  'UPDATE SET target.RowValidDateTo = GETUTCDATE(), target.Active = 0' + CHAR(13)  +
 	  'OUTPUT $action,' 
@@ -289,7 +302,7 @@ SET @sql = @sql +
 	  )  +','+ CHAR(13)  +
 	  'GETDATE(), NULL, @ETLLogID, @ETLLogID, 1' + ' INTO #' + 'D_' + @TableName + ';' + CHAR(13) +
 
-	   'select * FROM #' + 'D_' + @TableName + ' WHERE Change = ''UPDATE''' + CHAR(13)+ 
+	  -- Vložení aktualizovaných řádků do dimenzionální tabulky.
 	   'INSERT INTO ' +  @SchemaName + '.D_' + @TableName + CHAR(13) +
 	  '(' + CHAR(13) +
 	  (
@@ -342,11 +355,12 @@ SET @sql = @sql +
  --PRINT @sql
  EXEC sp_executesql @sql
 
+ -- Zalogování konce procedury.
 SET @LogMessage = 'Rebuilding load procedure ' + @SchemaName + '.p_load_D_' + @TableName + ' has finished'
-
 EXEC log.p_WriteFrameworkLog @ProcedureName, 'Info', @LogMessage
 
 END TRY
+-- Zalogování chyby procedury.
 BEGIN CATCH
 	DECLARE @ErrorMessage NVARCHAR(4000) = ERROR_MESSAGE()
 	EXEC log.p_WriteFrameworkLog @ProcedureName ,'Error', @ErrorMessage;

@@ -114,9 +114,10 @@ SET @sql = @sql +
   'UpdatedETLLogID,' + CHAR(13) +
   'Active' + CHAR(13) +
   ')' + CHAR(13) +
-  --
+  -- Sestavení příkazu select vracející data pro vložení do faktové tabulky.
  'SELECT' + CHAR(13) +
  (
+	  -- Select vracející seznam sloupců. Pro ID sloupce dimenzionálních tabulek je přidáva funkce ISNULL, která vrací hodnotu -1, pokud se hodnota v dimenzi nepodaří dohledat.
 	  SELECT 
 	  DISTINCT
 	  STRING_AGG(CASE WHEN dimTable.DimensionTableID IS NOT NULL THEN CONCAT ('ISNULL('+ dimTable.SchemaName, dimTable.TableName,stageTableColumn.ColumnName +'.' + dimTable.TableName + 'ID, -1)') ELSE stageTableColumn.ColumnName END, ',' + CHAR(13))
@@ -133,6 +134,7 @@ SET @sql = @sql +
   '1' + CHAR(13) +
   'FROM ' + @StageTableSchema + '.' +  @StageTableName + ' ' + @StageTableSchema + @StageTableName + CHAR(13) +
   (
+	  -- Sestavení klauzulí join na dimenzionální tabulky.
 	  SELECT 
 	  DISTINCT
 	  STRING_AGG(CONCAT('LEFT JOIN ', dimTable.SchemaName, '.D_', dimTable.TableName, ' ', dimTable.SchemaName, dimTable.TableName,stageTableColumn.ColumnName,  ' ON ', dimTable.SchemaName, dimTable.TableName,stageTableColumn.ColumnName, '.',dimTableColumn.ColumnName, ' = ', stageTable.SchemaName, stageTable.TableName,  '.', stageTableColumn.ColumnName), CHAR(13))
@@ -152,7 +154,7 @@ SET @sql = @sql +
 	SET @sql = @sql +'WHERE ' + @IncrementCondition + CHAR(13)
 	END
 
-
+  -- Přidání logování na konci generované procedury.
   SET @sql = @sql +
   'INSERT INTO @SummaryOfChanges (Change, Code) VALUES (''INSERT'', (SELECT COUNT(*) FROM '+ @SchemaName + '.F_' + @TableName +'))' + CHAR(13) +
 

@@ -10,6 +10,7 @@ AS
 		@cmd NVARCHAR(max),
 		@deleteCmd NVARCHAR(max)
 	
+	-- Smazaní dat z aktivních stage tabulek pro konkrétní schéma.
 	IF @SourceDataset IS NULL
 		BEGIN
 			SELECT @cmd = N'
@@ -24,10 +25,10 @@ AS
 			  [Active] = 1
 			  AND 
 			  TargetSchema = ''' + @StageSchema + '''
-			  )
-			  '
+			  )'
 		END
 	ELSE
+	-- Smazaní dat z aktivních stage tabulek pro konkrétní schéma a dataset.
 		BEGIN
 			SELECT @cmd = N'
 
@@ -43,8 +44,7 @@ AS
 			  TargetSchema = ''' + @StageSchema + '''
 			  AND
 			  SourceDataset = ''' + @SourceDataset + '''
-			  )
-			  '
+			  )'
 		END
 	  
 	  EXEC SP_EXECUTESQL 

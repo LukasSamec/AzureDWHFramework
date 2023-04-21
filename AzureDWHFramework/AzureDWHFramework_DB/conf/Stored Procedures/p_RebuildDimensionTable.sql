@@ -26,7 +26,7 @@ SET @sql = 'IF OBJECT_ID(''' + @SchemaName + '.D_' + @TableName + ''', N''U'') I
 --print (@sql)
 EXEC sp_executesql @sql
 
--- vygenerování příkazu create table.
+-- Vygenerování příkazu create table.
 SET @sql = 
 'CREATE TABLE ' + @SchemaName + '.D_' + @TableName + ' ( ' +
 -- Přidání primárního klíče ve tvaru <název tabulky>ID.
